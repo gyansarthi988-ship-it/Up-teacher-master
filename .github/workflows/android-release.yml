@@ -179,12 +179,12 @@ jobs:
               kotlin_block = """kotlinOptions {
                   jvmTarget = '17'
               }"""
-              if re.search(r"compileOptions\s*\\{[^}]*\\}", s, re.S):
-                  s = re.sub(r"compileOptions\s*\\{[^}]*\\}", compile_block, s, count=1, flags=re.S)
+              if re.search(r"compileOptions\s*\{[^}]*\}", s, re.S):
+                  s = re.sub(r"compileOptions\s*\{[^}]*\}", compile_block, s, count=1, flags=re.S)
               else:
                   s = s.replace("android {", "android {\n    " + compile_block, 1)
-              if re.search(r"kotlinOptions\s*\\{[^}]*\\}", s, re.S):
-                  s = re.sub(r"kotlinOptions\s*\\{[^}]*\\}", kotlin_block, s, count=1, flags=re.S)
+              if re.search(r"kotlinOptions\s*\{[^}]*\}", s, re.S):
+                  s = re.sub(r"kotlinOptions\s*\{[^}]*\}", kotlin_block, s, count=1, flags=re.S)
               else:
                   s = s.replace("android {", "android {\n    " + kotlin_block, 1)
               p.write_text(s)
@@ -198,12 +198,12 @@ jobs:
               kotlin_block = """kotlinOptions {
                   jvmTarget = "17"
               }"""
-              if re.search(r"compileOptions\s*\\{[^}]*\\}", s, re.S):
-                  s = re.sub(r"compileOptions\s*\\{[^}]*\\}", compile_block, s, count=1, flags=re.S)
+              if re.search(r"compileOptions\s*\{[^}]*\}", s, re.S):
+                  s = re.sub(r"compileOptions\s*\{[^}]*\}", compile_block, s, count=1, flags=re.S)
               else:
                   s = s.replace("android {", "android {\n    " + compile_block, 1)
-              if re.search(r"kotlinOptions\s*\\{[^}]*\\}", s, re.S):
-                  s = re.sub(r"kotlinOptions\s*\\{[^}]*\\}", kotlin_block, s, count=1, flags=re.S)
+              if re.search(r"kotlinOptions\s*\{[^}]*\}", s, re.S):
+                  s = re.sub(r"kotlinOptions\s*\{[^}]*\}", kotlin_block, s, count=1, flags=re.S)
               else:
                   s = s.replace("android {", "android {\n    " + kotlin_block, 1)
               p.write_text(s)
