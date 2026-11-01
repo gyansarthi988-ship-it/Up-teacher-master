@@ -14,23 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extract uploaded project source archive
+      - name: Extract uploaded project source packages
         run: |
-          if [ -f UP_Teacher_Master_Source_For_GitHub.zip ]; then
-            unzip -oq UP_Teacher_Master_Source_For_GitHub.zip -d .
+          shopt -s nullglob
+          packages=(UP_Teacher_Master_Part*.zip)
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "Upload all four UP_Teacher_Master_Part*.zip packages to the repository root."
+            exit 1
           fi
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-      - name: Check source tree exists
-        run: |
-          test -f mobile/pubspec.yaml || (echo "Missing mobile/ Flutter source. Upload the complete project source before running this workflow." && exit 1)
+          for package in "${packages[@]}"; do
+            echo "Extracting $package"
+            unzip -oq "$package" -d .
+          done
       - name: Generate Android wrapper
         working-directory: mobile
         run: flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master .
