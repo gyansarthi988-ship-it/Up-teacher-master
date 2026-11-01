@@ -17,7 +17,7 @@ jobs:
       - name: Extract uploaded project source archive(s)
         run: |
           shopt -s nullglob
-          packages=(UP_Teacher_Master_Source_For_GitHub.zip UP_Teacher_Master_Launch_Files.zip UP_Teacher_Master_Part*.zip)
+          packages=(UP_Teacher_Master_*.zip)
           if [ ${#packages[@]} -eq 0 ]; then
             echo "No UP Teacher Master source ZIP found in repository root."
             exit 1
