@@ -45,6 +45,14 @@ jobs:
           echo "mobile_dir=$mobile_dir" >> "$GITHUB_OUTPUT"
           echo "Found Flutter project: $mobile_dir"
 
+      - name: Apply verified Dart compile fixes
+        shell: bash
+        run: |
+          mobile_dir="${{ steps.locate_mobile.outputs.mobile_dir }}"
+          cp release-patches/mobile/lib/screens/profile_screen.dart "$mobile_dir/lib/screens/profile_screen.dart"
+          cp release-patches/mobile/lib/screens/syllabus_tracker_screen.dart "$mobile_dir/lib/screens/syllabus_tracker_screen.dart"
+          echo "Applied profile and syllabus compile fixes."
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
