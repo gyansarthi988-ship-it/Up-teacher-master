@@ -73,6 +73,23 @@ jobs:
           test -f android/gradlew || (echo "Android Gradle wrapper was not generated." && exit 1)
           test -f android/app/src/main/AndroidManifest.xml || (echo "AndroidManifest.xml is missing." && exit 1)
 
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          text = p.read_text()
+          if "login-callback" not in text:
+              intent = """
+                      <intent-filter>
+                          <action android:name="android.intent.action.VIEW" />
+                          <category android:name="android.intent.category.DEFAULT" />
+                          <category android:name="android.intent.category.BROWSABLE" />
+                          <data android:scheme="com.rsglobalacademy.upteachermaster" android:host="login-callback" />
+                      </intent-filter>
+              """
+              text = text.replace("</activity>", intent + "\\n                </activity>", 1)
+              p.write_text(text)
+          PY
+
       - name: Configure Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
