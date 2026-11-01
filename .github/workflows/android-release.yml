@@ -99,10 +99,10 @@ jobs:
               raise SystemExit("Android app build.gradle missing")
           import re
           g = gradle.read_text()
-          if re.search(r'ndkVersion\\s+', g):
-              g = re.sub(r'ndkVersion\\s+[^\\n]+', 'ndkVersion "27.0.12077973"', g, count=1)
+          if re.search(r'ndkVersion\s+', g):
+              g = re.sub(r'ndkVersion\s+[^\n]+', 'ndkVersion "27.0.12077973"', g, count=1)
           else:
-              g = g.replace("android {", 'android {\\n    ndkVersion "27.0.12077973"', 1)
+              g = g.replace("android {", 'android {\n    ndkVersion "27.0.12077973"', 1)
           gradle.write_text(g)
           print("Applied verified AI Mentor, Mock Test and Android NDK fixes.")
           PY
