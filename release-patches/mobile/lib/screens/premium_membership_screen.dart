@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
+/// Google Play builds must not route digital subscriptions to an external
+/// payment provider. Direct APK builds retain the existing Razorpay option.
+const bool _playStoreBuild = bool.fromEnvironment(
+  'PLAY_STORE_BUILD',
+  defaultValue: false,
+);
+
 class PremiumMembershipScreen extends StatefulWidget {
   final String language;
   const PremiumMembershipScreen({super.key, this.language = 'en'});
@@ -24,10 +31,12 @@ class _PremiumMembershipScreenState extends State<PremiumMembershipScreen> {
   @override
   void initState() {
     super.initState();
-    razorpay = Razorpay()
-      ..on(Razorpay.EVENT_PAYMENT_SUCCESS, _success)
-      ..on(Razorpay.EVENT_PAYMENT_ERROR, _failure)
-      ..on(Razorpay.EVENT_EXTERNAL_WALLET, _wallet);
+    if (!_playStoreBuild) {
+      razorpay = Razorpay()
+        ..on(Razorpay.EVENT_PAYMENT_SUCCESS, _success)
+        ..on(Razorpay.EVENT_PAYMENT_ERROR, _failure)
+        ..on(Razorpay.EVENT_EXTERNAL_WALLET, _wallet);
+    }
     _load();
   }
 
@@ -57,7 +66,7 @@ class _PremiumMembershipScreenState extends State<PremiumMembershipScreen> {
   }
 
   Future<void> _buy(Map<String, dynamic> plan) async {
-    if (paying) return;
+    if (_playStoreBuild || paying) return;
     setState(() => paying = true);
     try {
       final result = await db.functions.invoke(
@@ -202,10 +211,16 @@ class _PremiumMembershipScreenState extends State<PremiumMembershipScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          TextButton(
-                            onPressed: paying ? null : () => _buy(plan),
-                            child: Text(t('Buy', 'खरीदें')),
-                          ),
+                          if (_playStoreBuild)
+                            Text(
+                              t('Coming soon', 'जल्द उपलब्ध होगा'),
+                              style: const TextStyle(fontSize: 11),
+                            )
+                          else
+                            TextButton(
+                              onPressed: paying ? null : () => _buy(plan),
+                              child: Text(t('Buy', 'खरीदें')),
+                            ),
                         ],
                       ),
                     ),
