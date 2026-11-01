@@ -58,7 +58,7 @@ jobs:
           root = Path(sys.argv[1]) / "lib/screens"
           fixes = {
               "ai_study_mentor_screen.dart": [("questions'}')); }),", "questions'}))); }),")],
-              "mock_test_screen.dart": [("Colors.black)));\n  }));", "Colors.black))));\n  }));")],
+              "ai_study_mentor_screen.dart": [("questions'})); }),", "questions'}))); }),")],
           }
           for filename, replacements in fixes.items():
               path = root / filename
