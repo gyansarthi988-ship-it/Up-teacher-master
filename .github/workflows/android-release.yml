@@ -51,7 +51,26 @@ jobs:
           mobile_dir="${{ steps.locate_mobile.outputs.mobile_dir }}"
           cp release-patches/mobile/lib/screens/profile_screen.dart "$mobile_dir/lib/screens/profile_screen.dart"
           cp release-patches/mobile/lib/screens/syllabus_tracker_screen.dart "$mobile_dir/lib/screens/syllabus_tracker_screen.dart"
-          echo "Applied profile and syllabus compile fixes."
+          cp release-patches/mobile/lib/screens/premium_membership_screen.dart "$mobile_dir/lib/screens/premium_membership_screen.dart"
+          python3 - "$mobile_dir" <<'PY'
+          from pathlib import Path
+          import sys
+          root = Path(sys.argv[1]) / "lib/screens"
+          fixes = {
+              "ai_study_mentor_screen.dart": [("questions'}')); }),", "questions'}))); }),")],
+              "mock_test_screen.dart": [("Colors.black)));\n  }));", "Colors.black))));\n  }));")],
+          }
+          for filename, replacements in fixes.items():
+              path = root / filename
+              source = path.read_text()
+              for before, after in replacements:
+                  if before not in source:
+                      raise SystemExit(f"Expected syntax pattern not found in {filename}; refusing unsafe patch")
+                  source = source.replace(before, after, 1)
+              path.write_text(source)
+          print("Applied AI mentor and mock-test syntax fixes.")
+          PY
+          echo "Applied profile, syllabus, premium, AI mentor and mock-test compile fixes."
 
       - uses: actions/setup-java@v4
         with:
