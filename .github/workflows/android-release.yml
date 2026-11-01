@@ -56,6 +56,16 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Generate missing Android platform files
+        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
+        run: |
+          if [ ! -f android/settings.gradle ] && [ ! -f android/settings.gradle.kts ]; then
+            echo "Android Gradle wrapper files are missing; generating them with Flutter."
+            flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master .
+          fi
+          test -f android/gradlew || (echo "Android Gradle wrapper was not generated." && exit 1)
+          test -f android/app/src/main/AndroidManifest.xml || (echo "AndroidManifest.xml is missing." && exit 1)
+
       - name: Configure Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
