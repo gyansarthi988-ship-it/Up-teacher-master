@@ -250,11 +250,11 @@ jobs:
 
       - name: Build signed Android App Bundle
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: flutter build appbundle --release --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+        run: flutter build appbundle --release --dart-define=PLAY_STORE_BUILD=true --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Build signed APK
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: flutter build apk --release --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+        run: flutter build apk --release --dart-define=PLAY_STORE_BUILD=false --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Upload APK and AAB
         uses: actions/upload-artifact@v4
