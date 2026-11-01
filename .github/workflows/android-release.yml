@@ -86,7 +86,7 @@ jobs:
                           <data android:scheme="com.rsglobalacademy.upteachermaster" android:host="login-callback" />
                       </intent-filter>
               """
-              text = text.replace("</activity>", intent + "\\n                </activity>", 1)
+              text = text.replace("</activity>", intent + "\n                </activity>", 1)
               p.write_text(text)
           PY
 
