@@ -2,6 +2,12 @@ name: Build UP Teacher Master Release APK and AAB
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/android-release.yml'
+      - 'UP_Teacher_Master_Launch_Files.zip'
+      - 'release-patches/**'
 
 permissions:
   contents: read
