@@ -55,6 +55,7 @@ jobs:
         shell: bash
         run: |
           mobile_dir="${{ steps.locate_mobile.outputs.mobile_dir }}"
+          cp release-patches/mobile/lib/screens/auth_screen.dart "$mobile_dir/lib/screens/auth_screen.dart"
           cp release-patches/mobile/lib/screens/profile_screen.dart "$mobile_dir/lib/screens/profile_screen.dart"
           cp release-patches/mobile/lib/screens/syllabus_tracker_screen.dart "$mobile_dir/lib/screens/syllabus_tracker_screen.dart"
           cp release-patches/mobile/lib/screens/premium_membership_screen.dart "$mobile_dir/lib/screens/premium_membership_screen.dart"
