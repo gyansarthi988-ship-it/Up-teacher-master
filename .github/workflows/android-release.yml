@@ -14,6 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Extract uploaded project source archive
+        run: |
+          if [ -f UP_Teacher_Master_Source_For_GitHub.zip ]; then
+            unzip -oq UP_Teacher_Master_Source_For_GitHub.zip -d .
+          fi
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
