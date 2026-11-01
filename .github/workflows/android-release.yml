@@ -6,231 +6,67 @@ on:
 permissions:
   contents: read
 
-env:
-  FLUTTER_VERSION: '3.29.3'
-
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extract uploaded project source archive(s)
+
+      - name: Extract uploaded project source archive
         run: |
           shopt -s nullglob
           packages=(UP_Teacher_Master_*.zip)
           if [ ${#packages[@]} -eq 0 ]; then
-            echo "No UP Teacher Master source ZIP found in repository root."
+            echo "No UP Teacher Master ZIP found in repository root."
             exit 1
           fi
           for package in "${packages[@]}"; do
             echo "Extracting $package"
             unzip -oq "$package" -d .
           done
-      - name: Locate Flutter mobile project
+
+      - name: Locate Flutter project
         id: locate_mobile
+        shell: bash
         run: |
-          candidates=$(find . -name pubspec.yaml -not -path './.git/*' -print)
           mobile_dir=""
           while IFS= read -r file; do
-            if grep -qE '^[[:space:]]*flutter:[[:space:]]*
-      - name: Restore release signing configuration
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: |
-          cat > android/app/build.gradle <<'GRADLE'
-          plugins {
-              id "com.android.application"
-              id "kotlin-android"
-              id "dev.flutter.flutter-gradle-plugin"
-          }
-          def keystoreProperties = new Properties()
-          def keystorePropertiesFile = rootProject.file("key.properties")
-          if (keystorePropertiesFile.exists()) {
-              keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-          }
-          android {
-              namespace "com.rsglobalacademy.upteachermaster"
-              compileSdk flutter.compileSdkVersion
-              ndkVersion flutter.ndkVersion
-              defaultConfig {
-                  applicationId "com.rsglobalacademy.upteachermaster"
-                  minSdk 23
-                  targetSdk flutter.targetSdkVersion
-                  versionCode 1
-                  versionName "1.0.0"
-              }
-              signingConfigs {
-                  release {
-                      if (keystorePropertiesFile.exists()) {
-                          keyAlias keystoreProperties["keyAlias"]
-                          keyPassword keystoreProperties["keyPassword"]
-                          storeFile file(keystoreProperties["storeFile"])
-                          storePassword keystoreProperties["storePassword"]
-                      }
-                  }
-              }
-              buildTypes {
-                  release {
-                      if (keystorePropertiesFile.exists()) {
-                          signingConfig signingConfigs.release
-                      }
-                  }
-              }
-          }
-          flutter { source "../.." }
-          GRADLE
-      - name: Restore login deep link
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: |
-          python3 - <<'PYCODE'
-          from pathlib import Path
-          p=Path('android/app/src/main/AndroidManifest.xml')
-          s=p.read_text()
-          marker='<data android:scheme="com.rsglobalacademy.upteachermaster" android:host="login-callback"/>'
-          if marker not in s:
-              block='''<intent-filter android:autoVerify="false">
-                  <action android:name="android.intent.action.VIEW"/>
-                  <category android:name="android.intent.category.DEFAULT"/>
-                  <category android:name="android.intent.category.BROWSABLE"/>
-                  <data android:scheme="com.rsglobalacademy.upteachermaster" android:host="login-callback"/>
-              </intent-filter>'''
-              p.write_text(s.replace('</activity>',block+'\n</activity>'))
-          PYCODE
-      - name: Configure Supabase values
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
-          test -n "$SUPABASE_URL"
-          test -n "$SUPABASE_ANON_KEY"
-          echo "SUPABASE_URL=$SUPABASE_URL" >> "$GITHUB_ENV"
-          echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> "$GITHUB_ENV"
-      - name: Configure release signing
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-        run: |
-          test -n "$ANDROID_KEYSTORE_BASE64"
-          test -n "$ANDROID_KEY_ALIAS"
-          test -n "$ANDROID_KEY_PASSWORD"
-          test -n "$ANDROID_STORE_PASSWORD"
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
-          cat > android/key.properties <<EOF
-          storePassword=$ANDROID_STORE_PASSWORD
-          keyPassword=$ANDROID_KEY_PASSWORD
-          keyAlias=$ANDROID_KEY_ALIAS
-          storeFile=upload-keystore.jks
-          EOF
-      - name: Install dependencies
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: flutter pub get
-      - name: Build signed AAB
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: flutter build appbundle --release --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
-      - name: Build signed APK
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: flutter build apk --release --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: up-teacher-master-release-${{ github.run_number }}
-          path: |
-            mobile/build/app/outputs/bundle/release/app-release.aab
-            mobile/build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
-          retention-days: 30
- "$file"; then
-              mobile_dir=$(dirname "$file")
+            if grep -qE '^[[:space:]]*flutter:[[:space:]]*$' "$file"; then
+              mobile_dir="$(dirname "$file")"
               break
             fi
-          done <<< "$candidates"
+          done < <(find . -name pubspec.yaml -not -path './.git/*' -print)
           if [ -z "$mobile_dir" ]; then
-            echo "Could not locate Flutter pubspec.yaml in extracted source archive."
-            echo "Available pubspec files:"
-            printf '%s\\n' "$candidates"
+            echo "Flutter pubspec.yaml not found."
+            find . -name pubspec.yaml -print
             exit 1
           fi
-          mobile_dir=${mobile_dir#./}
+          mobile_dir="${mobile_dir#./}"
           echo "mobile_dir=$mobile_dir" >> "$GITHUB_OUTPUT"
-          echo "Flutter project found at: $mobile_dir"
-      - name: Generate Android wrapper
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master .
-      - name: Restore release signing configuration
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: |
-          cat > android/app/build.gradle <<'GRADLE'
-          plugins {
-              id "com.android.application"
-              id "kotlin-android"
-              id "dev.flutter.flutter-gradle-plugin"
-          }
-          def keystoreProperties = new Properties()
-          def keystorePropertiesFile = rootProject.file("key.properties")
-          if (keystorePropertiesFile.exists()) {
-              keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-          }
-          android {
-              namespace "com.rsglobalacademy.upteachermaster"
-              compileSdk flutter.compileSdkVersion
-              ndkVersion flutter.ndkVersion
-              defaultConfig {
-                  applicationId "com.rsglobalacademy.upteachermaster"
-                  minSdk 23
-                  targetSdk flutter.targetSdkVersion
-                  versionCode 1
-                  versionName "1.0.0"
-              }
-              signingConfigs {
-                  release {
-                      if (keystorePropertiesFile.exists()) {
-                          keyAlias keystoreProperties["keyAlias"]
-                          keyPassword keystoreProperties["keyPassword"]
-                          storeFile file(keystoreProperties["storeFile"])
-                          storePassword keystoreProperties["storePassword"]
-                      }
-                  }
-              }
-              buildTypes {
-                  release {
-                      if (keystorePropertiesFile.exists()) {
-                          signingConfig signingConfigs.release
-                      }
-                  }
-              }
-          }
-          flutter { source "../.." }
-          GRADLE
-      - name: Restore login deep link
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: |
-          python3 - <<'PYCODE'
-          from pathlib import Path
-          p=Path('android/app/src/main/AndroidManifest.xml')
-          s=p.read_text()
-          marker='<data android:scheme="com.rsglobalacademy.upteachermaster" android:host="login-callback"/>'
-          if marker not in s:
-              block='''<intent-filter android:autoVerify="false">
-                  <action android:name="android.intent.action.VIEW"/>
-                  <category android:name="android.intent.category.DEFAULT"/>
-                  <category android:name="android.intent.category.BROWSABLE"/>
-                  <data android:scheme="com.rsglobalacademy.upteachermaster" android:host="login-callback"/>
-              </intent-filter>'''
-              p.write_text(s.replace('</activity>',block+'\n</activity>'))
-          PYCODE
-      - name: Configure Supabase values
-        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
+          echo "Found Flutter project: $mobile_dir"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: stable
+          cache: true
+
+      - name: Configure Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          test -n "$SUPABASE_URL"
-          test -n "$SUPABASE_ANON_KEY"
+          test -n "$SUPABASE_URL" || (echo "Missing SUPABASE_URL secret" && exit 1)
+          test -n "$SUPABASE_ANON_KEY" || (echo "Missing SUPABASE_ANON_KEY secret" && exit 1)
           echo "SUPABASE_URL=$SUPABASE_URL" >> "$GITHUB_ENV"
           echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> "$GITHUB_ENV"
-      - name: Configure release signing
+
+      - name: Configure Android release signing
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -238,10 +74,11 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
-          test -n "$ANDROID_KEYSTORE_BASE64"
-          test -n "$ANDROID_KEY_ALIAS"
-          test -n "$ANDROID_KEY_PASSWORD"
-          test -n "$ANDROID_STORE_PASSWORD"
+          test -n "$ANDROID_KEYSTORE_BASE64" || (echo "Missing ANDROID_KEYSTORE_BASE64 secret" && exit 1)
+          test -n "$ANDROID_KEY_ALIAS" || (echo "Missing ANDROID_KEY_ALIAS secret" && exit 1)
+          test -n "$ANDROID_KEY_PASSWORD" || (echo "Missing ANDROID_KEY_PASSWORD secret" && exit 1)
+          test -n "$ANDROID_STORE_PASSWORD" || (echo "Missing ANDROID_STORE_PASSWORD secret" && exit 1)
+          mkdir -p android/app
           echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
           cat > android/key.properties <<EOF
           storePassword=$ANDROID_STORE_PASSWORD
@@ -249,20 +86,25 @@ jobs:
           keyAlias=$ANDROID_KEY_ALIAS
           storeFile=upload-keystore.jks
           EOF
-      - name: Install dependencies
+
+      - name: Install Flutter dependencies
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
         run: flutter pub get
-      - name: Build signed AAB
+
+      - name: Build signed Android App Bundle
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
         run: flutter build appbundle --release --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+
       - name: Build signed APK
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
         run: flutter build apk --release --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload APK and AAB
+        uses: actions/upload-artifact@v4
         with:
           name: up-teacher-master-release-${{ github.run_number }}
           path: |
-            mobile/build/app/outputs/bundle/release/app-release.aab
-            mobile/build/app/outputs/flutter-apk/app-release.apk
+            ${{ steps.locate_mobile.outputs.mobile_dir }}/build/app/outputs/bundle/release/app-release.aab
+            ${{ steps.locate_mobile.outputs.mobile_dir }}/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 30
