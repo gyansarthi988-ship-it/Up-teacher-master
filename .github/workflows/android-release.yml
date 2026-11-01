@@ -61,7 +61,14 @@ jobs:
         run: |
           if [ ! -f android/settings.gradle ] && [ ! -f android/settings.gradle.kts ]; then
             echo "Android Gradle wrapper files are missing; generating them with Flutter."
+            if [ -f android/app/build.gradle ]; then
+              cp android/app/build.gradle /tmp/up-teacher-master-app-build.gradle
+              keep_app_gradle=yes
+            fi
             flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master .
+            if [ "${keep_app_gradle:-no}" = yes ]; then
+              cp /tmp/up-teacher-master-app-build.gradle android/app/build.gradle
+            fi
           fi
           test -f android/gradlew || (echo "Android Gradle wrapper was not generated." && exit 1)
           test -f android/app/src/main/AndroidManifest.xml || (echo "AndroidManifest.xml is missing." && exit 1)
