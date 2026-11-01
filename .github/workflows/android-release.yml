@@ -53,7 +53,59 @@ jobs:
           cp release-patches/mobile/lib/screens/syllabus_tracker_screen.dart "$mobile_dir/lib/screens/syllabus_tracker_screen.dart"
           cp release-patches/mobile/lib/screens/premium_membership_screen.dart "$mobile_dir/lib/screens/premium_membership_screen.dart"
           echo "Applied verified profile, syllabus and premium screen replacements."
-          echo "No blind text substitutions will be made to AI Mentor or Mock Test source files."
+          python3 - <<'PY'
+          from pathlib import Path
+
+          ai = Path("${{ steps.locate_mobile.outputs.mobile_dir }}/lib/screens/ai_study_mentor_screen.dart")
+          text = ai.read_text()
+          old = next((line for line in text.splitlines() if "...tasks.map((t)" in line), None)
+          if old is None:
+              raise SystemExit("AI Mentor task-card line not found; refusing unsafe patch")
+          new = """            ...tasks.map((t) {
+                final item = Map<String, dynamic>.from(t as Map);
+                final completed = item['status'] == 'completed';
+                final title = (hi ? item['title_hi'] : item['title_en'])?.toString() ?? '';
+                final details = '${item['scheduled_for']} · ${item['target_questions']} ${hi ? 'प्रश्न' : 'questions'} · ${item['status']}';
+                return Card(
+                  child: ListTile(
+                    leading: Icon(completed ? Icons.check_circle : Icons.menu_book,
+                      color: completed ? Colors.green : null),
+                    title: Text(title),
+                    subtitle: Text(details),
+                  ),
+                );
+              }),"""
+          ai.write_text(text.replace(old, new, 1))
+
+          mock = Path("${{ steps.locate_mobile.outputs.mobile_dir }}/lib/screens/mock_test_screen.dart")
+          text = mock.read_text()
+          old = next((line for line in text.splitlines() if "return InkWell(onTap: () => setState(() => _current = i)" in line), None)
+          if old is None:
+              raise SystemExit("Mock Test palette line not found; refusing unsafe patch")
+          new = """    return InkWell(
+                onTap: () => setState(() => _current = i),
+                child: CircleAvatar(
+                  radius: 19,
+                  backgroundColor: i == _current ? Colors.blue : marked ? Colors.deepOrange : answered ? Colors.green : Colors.grey.shade300,
+                  child: Text('${i + 1}', style: TextStyle(
+                    color: (i == _current || marked || answered) ? Colors.white : Colors.black,
+                  )),
+                ),
+              );"""
+          mock.write_text(text.replace(old, new, 1))
+
+          gradle = Path("${{ steps.locate_mobile.outputs.mobile_dir }}/android/app/build.gradle")
+          if not gradle.exists():
+              raise SystemExit("Android app build.gradle missing")
+          import re
+          g = gradle.read_text()
+          if re.search(r'ndkVersion\\s+', g):
+              g = re.sub(r'ndkVersion\\s+[^\\n]+', 'ndkVersion "27.0.12077973"', g, count=1)
+          else:
+              g = g.replace("android {", 'android {\\n    ndkVersion "27.0.12077973"', 1)
+          gradle.write_text(g)
+          print("Applied verified AI Mentor, Mock Test and Android NDK fixes.")
+          PY
 
       - uses: actions/setup-java@v4
         with:
