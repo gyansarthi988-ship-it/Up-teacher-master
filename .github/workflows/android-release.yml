@@ -58,10 +58,29 @@ jobs:
           cp release-patches/mobile/lib/screens/auth_screen.dart "$mobile_dir/lib/screens/auth_screen.dart"
           mkdir -p supabase/migrations
           cp release-patches/supabase/migrations/0020_username_registration.sql supabase/migrations/0020_username_registration.sql
+          cp release-patches/supabase/migrations/0021_spaced_revision_rpc_repair.sql supabase/migrations/0021_spaced_revision_rpc_repair.sql
           cp release-patches/mobile/lib/screens/profile_screen.dart "$mobile_dir/lib/screens/profile_screen.dart"
           cp release-patches/mobile/lib/screens/syllabus_tracker_screen.dart "$mobile_dir/lib/screens/syllabus_tracker_screen.dart"
           cp release-patches/mobile/lib/screens/premium_membership_screen.dart "$mobile_dir/lib/screens/premium_membership_screen.dart"
-          echo "Applied verified profile, syllabus and premium screen replacements."
+          revision_screen="$mobile_dir/lib/screens/spaced_revision_screen.dart"
+          if [ -f "$revision_screen" ]; then
+            python3 - "$revision_screen" <<'PYREV'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          s = p.read_text()
+          s = s.replace("if (item == null) Card(child:", "if (item == null && error == null) Card(child:")
+          s = s.replace("} catch (e) { error = e.toString(); }", """} catch (e) {
+                items = [];
+                final raw = e.toString();
+                error = (raw.contains('PGRST202') || raw.contains('get_my_revision_queue'))
+                  ? (hi ? 'रिवीजन डेटाबेस अपडेट अधूरा है। व्यवस्थापक से संपर्क करें।' : 'Revision database update is missing. Please contact support.')
+                  : (hi ? 'रिवीजन लोड नहीं हो सका। कृपया पुनः प्रयास करें।' : 'Revision could not be loaded. Please try again.');
+              }""", 1)
+          p.write_text(s)
+          PYREV
+          fi
+          echo "Applied verified profile, syllabus, premium and spaced-revision fixes."
           python3 - <<'PY'
           from pathlib import Path
 
