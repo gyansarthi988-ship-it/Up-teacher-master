@@ -17,15 +17,20 @@ jobs:
           set -e
           mkdir -p /tmp/upteacher
           unzip -q UP_Teacher_Master_Launch_Files.zip -d /tmp/upteacher
+          cd /tmp/upteacher/UP_Teacher_Master
           {
-            echo "=== PROJECT FILES ==="
-            find /tmp/upteacher -type f | sed 's#^/tmp/upteacher/##' | grep -E '(auth|admin|profile|role|supabase|pubspec|router|login|user)' | head -300
-            echo
-            echo "=== AUTH / ROLE REFERENCES ==="
-            grep -RniE 'super_admin|admin|signInWithPassword|signUp|auth\.currentUser|user_metadata|app_metadata|hasRole|role' /tmp/upteacher --include='*.dart' --include='*.ts' --include='*.tsx' --include='*.sql' --include='*.js' 2>/dev/null | head -1200 || true
-          } > source-audit.txt
+            for f in admin/app/page.tsx admin/lib/supabase.ts admin/package.json mobile/lib/screens/auth_screen.dart mobile/lib/screens/profile_screen.dart supabase/migrations/0001_phase1_foundation.sql supabase/migrations/0020_username_registration.sql; do
+              if [ -f "$f" ]; then
+                echo "===== $f ====="
+                sed -n '1,260p' "$f"
+                echo
+              fi
+            done
+            echo "===== ROLE / ADMIN SQL ====="
+            grep -RniE 'create.*function.*is_admin|function.*has_role|create table.*user_roles|super_admin|ADMIN_BOOTSTRAP' supabase docs 2>/dev/null | head -400 || true
+          } > source-admin-auth-details.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: source-audit-admin-auth
-          path: source-audit.txt
+          name: source-admin-auth-details
+          path: source-admin-auth-details.txt
           retention-days: 3
