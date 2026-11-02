@@ -15,20 +15,25 @@ jobs:
         shell: bash
         run: |
           set -e
+          ZIP="$(find . -type f -name 'UP_Teacher_Master_Launch_Files.zip' -print -quit)"
+          test -n "$ZIP"
           mkdir -p /tmp/upteacher
-          unzip -q UP_Teacher_Master_Launch_Files.zip -d /tmp/upteacher
-          cd /tmp/upteacher/UP_Teacher_Master
+          unzip -q "$ZIP" -d /tmp/upteacher
+          ROOT="$(find /tmp/upteacher -type f -path '*/admin/app/page.tsx' -print -quit | sed 's#/admin/app/page.tsx##')"
+          test -n "$ROOT"
           {
-            for f in admin/app/page.tsx admin/lib/supabase.ts admin/package.json mobile/lib/screens/auth_screen.dart mobile/lib/screens/profile_screen.dart supabase/migrations/0001_phase1_foundation.sql supabase/migrations/0020_username_registration.sql; do
-              if [ -f "$f" ]; then
-                echo "===== $f ====="
-                sed -n '1,260p' "$f"
-                echo
-              fi
-            done
-            echo "===== ROLE / ADMIN SQL ====="
-            grep -RniE 'create.*function.*is_admin|function.*has_role|create table.*user_roles|super_admin|ADMIN_BOOTSTRAP' supabase docs 2>/dev/null | head -400 || true
-          } > source-admin-auth-details.txt
+            echo "SOURCE_ROOT=$ROOT"
+            echo "===== ADMIN PAGE ====="
+            sed -n '1,240p' "$ROOT/admin/app/page.tsx"
+            echo "===== SUPABASE CLIENT ====="
+            sed -n '1,180p' "$ROOT/admin/lib/supabase.ts"
+            echo "===== PACKAGE ====="
+            cat "$ROOT/admin/package.json"
+            echo "===== ROLE SQL ====="
+            grep -RniE 'create.*function.*is_admin|function.*has_role|create table.*user_roles|super_admin|ADMIN_BOOTSTRAP' "$ROOT/supabase" "$ROOT/docs" 2>/dev/null | head -300 || true
+            echo "===== ADMIN WORKFLOW ====="
+            sed -n '1,220p' "$ROOT/.github/workflows/admin-check.yml" 2>/dev/null || true
+          } > "$GITHUB_WORKSPACE/source-admin-auth-details.txt"
       - uses: actions/upload-artifact@v4
         with:
           name: source-admin-auth-details
