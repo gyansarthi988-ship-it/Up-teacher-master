@@ -1,0 +1,46 @@
+name: Admin Portal Build Check
+
+on:
+  push:
+    branches: [audit/admin-auth-source]
+    paths:
+      - 'release-patches/admin/**'
+      - 'UP_Teacher_Master_Launch_Files.zip'
+      - '.github/workflows/admin-portal-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Extract project and apply admin security patch
+        shell: bash
+        run: |
+          set -e
+          ZIP="$(find . -type f -name 'UP_Teacher_Master_Launch_Files.zip' -print -quit)"
+          test -n "$ZIP"
+          mkdir -p /tmp/upteacher
+          unzip -q "$ZIP" -d /tmp/upteacher
+          ROOT="$(find /tmp/upteacher -type f -path '*/admin/package.json' -print -quit | sed 's#/admin/package.json##')"
+          test -n "$ROOT"
+          cp release-patches/admin/app/page.tsx "$ROOT/admin/app/page.tsx"
+          echo "ADMIN_ROOT=$ROOT/admin" >> "$GITHUB_ENV"
+      - name: Install dependencies
+        working-directory: ${{ env.ADMIN_ROOT }}
+        run: npm install
+      - name: Build private admin portal
+        working-directory: ${{ env.ADMIN_ROOT }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || (echo 'Missing GitHub Actions secret SUPABASE_URL' && exit 1)
+          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" || (echo 'Missing GitHub Actions secret SUPABASE_ANON_KEY' && exit 1)
+          npm run build
