@@ -1,0 +1,54 @@
+name: Prepare Admin Portal for Vercel on main
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "UP_Teacher_Master_Launch_Files.zip"
+      - "release-patches/admin/**"
+      - ".github/workflows/prepare-vercel-admin-main.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  prepare-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Extract Admin Portal source and apply security patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f UP_Teacher_Master_Launch_Files.zip
+          test -f release-patches/admin/app/page.tsx
+          rm -rf /tmp/up-teacher-source
+          mkdir -p /tmp/up-teacher-source
+          unzip -q UP_Teacher_Master_Launch_Files.zip 'UP_Teacher_Master/admin/*' -d /tmp/up-teacher-source
+          test -f /tmp/up-teacher-source/UP_Teacher_Master/admin/package.json
+          rm -rf admin
+          cp -R /tmp/up-teacher-source/UP_Teacher_Master/admin ./admin
+          cp release-patches/admin/app/page.tsx admin/app/page.tsx
+          test -f admin/package.json
+          test -f admin/app/page.tsx
+
+      - name: Commit deployable admin directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add admin/
+          if git diff --cached --quiet; then
+            echo "Admin directory is already up to date."
+          else
+            git commit -m "Add deployable private Admin Portal for Vercel"
+            git push origin HEAD:main
+          fi
