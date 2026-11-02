@@ -1,0 +1,31 @@
+name: Temporary Source Audit
+on:
+  push:
+    branches: [audit/admin-auth-source]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract and inspect project source
+        shell: bash
+        run: |
+          set -e
+          mkdir -p /tmp/upteacher
+          unzip -q UP_Teacher_Master_Launch_Files.zip -d /tmp/upteacher
+          {
+            echo "=== PROJECT FILES ==="
+            find /tmp/upteacher -type f | sed 's#^/tmp/upteacher/##' | grep -E '(auth|admin|profile|role|supabase|pubspec|router|login|user)' | head -300
+            echo
+            echo "=== AUTH / ROLE REFERENCES ==="
+            grep -RniE 'super_admin|admin|signInWithPassword|signUp|auth\.currentUser|user_metadata|app_metadata|hasRole|role' /tmp/upteacher --include='*.dart' --include='*.ts' --include='*.tsx' --include='*.sql' --include='*.js' 2>/dev/null | head -1200 || true
+          } > source-audit.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: source-audit-admin-auth
+          path: source-audit.txt
+          retention-days: 3
