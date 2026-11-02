@@ -1,0 +1,24 @@
+"use client";
+import { FormEvent, useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
+type Exam = { id: string; name_en: string; name_hi: string };
+type Item = { id: string; title_en: string; title_hi: string | null; category: string; is_published: boolean; created_at: string };
+export default function AnnouncementManager({ exams }: { exams: Exam[] }) {
+  const [items,setItems]=useState<Item[]>([]); const [title,setTitle]=useState(""); const [titleHi,setTitleHi]=useState("");
+  const [body,setBody]=useState(""); const [bodyHi,setBodyHi]=useState(""); const [category,setCategory]=useState("general");
+  const [examId,setExamId]=useState(""); const [publish,setPublish]=useState(true); const [busy,setBusy]=useState(false); const [message,setMessage]=useState("");
+  async function load(){const {data,error}=await supabase.from("announcements").select("id,title_en,title_hi,category,is_published,created_at").order("created_at",{ascending:false}).limit(100);if(error)setMessage(error.message);else setItems((data??[]) as Item[])}
+  useEffect(()=>{void load()},[]);
+  async function submit(e:FormEvent){e.preventDefault();setBusy(true);setMessage("");const {error}=await supabase.from("announcements").insert({title_en:title.trim(),title_hi:titleHi.trim()||null,body_en:body.trim(),body_hi:bodyHi.trim()||null,category,target_exam_id:examId||null,is_published:publish,publish_at:publish?new Date().toISOString():null});if(error)setMessage(error.message);else{setTitle("");setTitleHi("");setBody("");setBodyHi("");setMessage("Announcement saved.");await load()}setBusy(false)}
+  async function toggle(x:Item){const {error}=await supabase.from("announcements").update({is_published:!x.is_published,publish_at:!x.is_published?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq("id",x.id);if(error)setMessage(error.message);else await load()}
+  async function sendPush(id:string){setMessage("Sending push notification…");const {data,error}=await supabase.functions.invoke("send-push-notification",{body:{announcement_id:id}});if(error)setMessage(`Push failed: ${error.message}`);else setMessage(`Push result: ${data.sent} sent, ${data.failed} failed.`)}
+  async function remove(id:string){if(!confirm("Delete this announcement?"))return;const {error}=await supabase.from("announcements").delete().eq("id",id);if(error)setMessage(error.message);else await load()}
+  return <section className="card" style={{marginTop:20}}><h2>Notifications & Announcements</h2><p className="muted">Create bilingual notices, exam updates and important alerts for app users.</p>
+    <form onSubmit={submit}><label>Title (English)</label><input required maxLength={160} value={title} onChange={e=>setTitle(e.target.value)}/><label>शीर्षक (Hindi)</label><input value={titleHi} onChange={e=>setTitleHi(e.target.value)}/>
+    <label>Message (English)</label><textarea required maxLength={5000} rows={4} value={body} onChange={e=>setBody(e.target.value)} style={{width:"100%",padding:12,border:"1px solid #ccd6e2",borderRadius:9,margin:"7px 0 14px"}}/>
+    <label>संदेश (Hindi)</label><textarea rows={4} value={bodyHi} onChange={e=>setBodyHi(e.target.value)} style={{width:"100%",padding:12,border:"1px solid #ccd6e2",borderRadius:9,margin:"7px 0 14px"}}/>
+    <label>Category</label><select value={category} onChange={e=>setCategory(e.target.value)} style={{width:"100%",padding:12,margin:"7px 0 14px"}}><option value="general">General</option><option value="exam_update">Exam Update</option><option value="important">Important</option><option value="maintenance">Maintenance</option></select>
+    <label>Target exam (optional)</label><select value={examId} onChange={e=>setExamId(e.target.value)} style={{width:"100%",padding:12,margin:"7px 0 14px"}}><option value="">All exams</option>{exams.map(x=><option key={x.id} value={x.id}>{x.name_en} · {x.name_hi}</option>)}</select>
+    <label style={{display:"flex",gap:8,alignItems:"center"}}><input type="checkbox" checked={publish} onChange={e=>setPublish(e.target.checked)} style={{width:"auto",margin:0}}/> Publish immediately</label><p><button disabled={busy}>{busy?"Saving…":"Save Announcement"}</button></p></form>
+    {message&&<p className="muted">{message}</p>}<h3>Recent announcements</h3>{items.map(x=><div key={x.id} style={{borderTop:"1px solid #e5eaf1",padding:"12px 0",display:"flex",justifyContent:"space-between",gap:12,alignItems:"center"}}><div><b>{x.title_en}</b><br/><small>{x.category} · {x.is_published?"Published":"Draft"}</small></div><div style={{display:"flex",gap:8}}><button onClick={()=>void toggle(x)}>{x.is_published?"Unpublish":"Publish"}</button>{x.is_published&&<button onClick={()=>void sendPush(x.id)}>Send Push</button>}<button onClick={()=>void remove(x.id)} style={{background:"#9b2c2c"}}>Delete</button></div></div>)}{!items.length&&<p className="muted">No announcements yet.</p>}</section>
+}
