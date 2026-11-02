@@ -1,0 +1,31 @@
+name: Temporary Source Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/source-audit.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract project archive
+        run: |
+          shopt -s nullglob
+          files=(UP_Teacher_Master_*.zip)
+          test ${#files[@]} -gt 0
+          for f in "${files[@]}"; do unzip -oq "$f" -d extracted; done
+      - name: Create source inventory and auth excerpts
+        run: |
+          mkdir -p audit-output
+          find extracted -type f \( -name '*.dart' -o -name '*.sql' -o -name '*.ts' -o -name '*.tsx' -o -name '*.js' \) | sort > audit-output/source-files.txt
+          grep -RIlE 'super_admin|admin|profiles|user_roles|has_role|role' extracted --include='*.dart' --include='*.sql' --include='*.ts' --include='*.tsx' > audit-output/auth-candidates.txt || true
+          tar -czf audit-output/source-code.tar.gz -C extracted .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: up-teacher-master-source-audit
+          path: audit-output/
+          retention-days: 3
