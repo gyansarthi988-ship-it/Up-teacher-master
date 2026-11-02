@@ -35,6 +35,18 @@ export default function AdminHome() {
     setChecking(true);
     setError("");
     try {
+      // A visitor without a session is expected on the public login page.
+      // Check the local session first so Supabase's "Auth session missing"
+      // response is not shown as a login error.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setUser(null);
+        setAllowed(false);
+        setExams([]);
+        return;
+      }
+
+      // Once a session exists, verify the user against Supabase Auth.
       const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       setUser(currentUser?.email ?? currentUser?.phone ?? null);
