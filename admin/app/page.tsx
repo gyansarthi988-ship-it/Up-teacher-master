@@ -87,10 +87,25 @@ export default function AdminHome() {
 
   useEffect(() => {
     void refresh();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      void refresh();
+
+    // Never call Supabase auth methods from inside onAuthStateChange.
+    // Supabase holds an internal auth lock while invoking the listener; calling
+    // getSession/getUser there can deadlock the WebView after returning from
+    // Android's document picker (or during token refresh).
+    let refreshTimer: number | undefined;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "TOKEN_REFRESHED") return;
+      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => {
+        refreshTimer = undefined;
+        void refresh();
+      }, 0);
     });
-    return () => subscription.unsubscribe();
+
+    return () => {
+      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function signIn(event: FormEvent) {
