@@ -3,8 +3,8 @@ name: Inspect mobile mock-test integration source
 on:
   push:
     branches: [excel-question-bank-engine]
-    paths:
-      - '.github/workflows/inspect-mobile-source.yml'
+  pull_request:
+    branches: [admin-apk-wrapper]
   workflow_dispatch:
 
 permissions:
