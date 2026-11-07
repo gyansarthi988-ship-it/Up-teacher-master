@@ -55,6 +55,17 @@ jobs:
         run: |
           echo 'Project references:'
           grep -RniE 'io\\.flutter\\.app|PluginRegistry\\.Registrar|registerWith\\(' android lib pubspec.yaml .flutter-plugins .flutter-plugins-dependencies 2>/dev/null || true
+      - name: Restore missing root Android Gradle scaffold
+        run: |
+          if [ ! -f "$MOBILE_DIR/android/build.gradle" ] && [ ! -f "$MOBILE_DIR/android/build.gradle.kts" ]; then
+            flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master /tmp/uptm_android_scaffold
+            cp /tmp/uptm_android_scaffold/android/build.gradle "$MOBILE_DIR/android/"
+            cp /tmp/uptm_android_scaffold/android/settings.gradle "$MOBILE_DIR/android/"
+            cp /tmp/uptm_android_scaffold/android/gradle.properties "$MOBILE_DIR/android/"
+            cp /tmp/uptm_android_scaffold/android/gradlew "$MOBILE_DIR/android/"
+            cp /tmp/uptm_android_scaffold/android/gradlew.bat "$MOBILE_DIR/android/"
+            cp -R /tmp/uptm_android_scaffold/android/gradle "$MOBILE_DIR/android/"
+          fi
       - name: Build debug APK
         working-directory: ${{ env.MOBILE_DIR }}
         run: flutter build apk --debug --verbose
