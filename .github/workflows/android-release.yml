@@ -189,11 +189,7 @@ jobs:
         run: |
           if [ ! -f android/build.gradle ] && [ ! -f android/build.gradle.kts ]; then
             flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master /tmp/uptm_android_scaffold
-            cp /tmp/uptm_android_scaffold/android/build.gradle android/
-            cp /tmp/uptm_android_scaffold/android/settings.gradle android/
-            cp /tmp/uptm_android_scaffold/android/gradle.properties android/
-            cp /tmp/uptm_android_scaffold/android/gradlew android/
-            cp /tmp/uptm_android_scaffold/android/gradlew.bat android/
+            find /tmp/uptm_android_scaffold/android -maxdepth 1 -type f -exec cp {} android/ \\;
             cp -R /tmp/uptm_android_scaffold/android/gradle android/
           fi
 
