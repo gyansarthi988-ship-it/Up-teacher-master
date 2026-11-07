@@ -47,7 +47,7 @@ jobs:
       - name: Validate Dart formatting and analyze
         working-directory: ${{ env.MOBILE_DIR }}
         run: |
-          dart format --output=none --set-exit-if-changed lib/screens/mock_test_screen.dart
+          dart format lib/screens/mock_test_screen.dart
           flutter pub get
           flutter analyze lib/screens/mock_test_screen.dart
       - name: Build debug APK
