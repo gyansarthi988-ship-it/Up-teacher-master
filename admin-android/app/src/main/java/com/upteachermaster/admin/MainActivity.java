@@ -74,7 +74,15 @@ public class MainActivity extends Activity {
                 if (filePathCallback != null) filePathCallback.onReceiveValue(null);
                 filePathCallback = callback;
                 try {
-                    Intent intent = params.createIntent();
+                    Intent intent;
+                    try {
+                        intent = params.createIntent();
+                    } catch (Exception chooserError) {
+                        intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        intent.setType("*/*");
+                    }
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST);
                     return true;
                 } catch (Exception e) {
@@ -119,10 +127,25 @@ public class MainActivity extends Activity {
         if (requestCode == FILE_CHOOSER_REQUEST && filePathCallback != null) {
             Uri[] results = null;
             if (resultCode == Activity.RESULT_OK && data != null) {
-                Uri uri = data.getData();
-                if (uri != null) results = new Uri[] { uri };
-                else results = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+                try {
+                    results = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+                } catch (Exception parseError) {
+                    Uri uri = data.getData();
+                    if (uri != null) results = new Uri[] { uri };
+                }
+                if ((results == null || results.length == 0) && data.getData() != null) {
+                    results = new Uri[] { data.getData() };
+                }
+                if ((results == null || results.length == 0) && data.getClipData() != null) {
+                    int count = data.getClipData().getItemCount();
+                    results = new Uri[count];
+                    for (int i = 0; i < count; i++) {
+                        results[i] = data.getClipData().getItemAt(i).getUri();
+                    }
+                }
             }
+            android.util.Log.d("UPTM-WebView", "File chooser result: " + resultCode
+                + ", selected: " + (results == null ? 0 : results.length));
             filePathCallback.onReceiveValue(results);
             filePathCallback = null;
         }
