@@ -37,7 +37,7 @@ begin
  delete from public.mock_test_template_questions where template_id=tid;
  for r in select value from jsonb_array_elements(p_payload->'questions') loop
   select id into sid from public.subjects where upper(code)=upper(r->>'subject_code');
-  select id into qid from public.questions where exam_id=ex and subject_id=sid and lower(question_ref)=lower(r->>'question_ref') and status='published';
+  select id into qid from public.questions where exam_id=ex and subject_id=sid and lower(question_ref)=lower(r->>'question_ref');
   if sid is null or qid is null then raise exception 'Row %: question_ref % is missing, unpublished or mismatched',r->>'question_order',r->>'question_ref'; end if;
   insert into public.mock_test_template_questions(template_id,question_id,question_order,marks_override,negative_marks_override)
   values(tid,qid,(r->>'question_order')::int,nullif(r->>'marks_override','')::numeric,nullif(r->>'negative_marks_override','')::numeric);
