@@ -68,4 +68,18 @@ old3="'p_mode': 'mock'});"
 if old3 not in s: raise SystemExit("Mock Test submission call did not match; refusing patch")
 s=s.replace(old3,"'p_mode': 'mock', 'p_template_id': widget.templateId});",1)
 p.write_text(s)
+palette_old="    return InkWell(onTap: () => setState(() => _current = i), child: CircleAvatar(radius: 19, backgroundColor: i == _current ? Colors.blue : marked ? Colors.deepOrange : answered ? Colors.green : Colors.grey.shade300, child: Text('${i+1}', style: TextStyle(color: (i == _current || marked || answered) ? Colors.white : Colors.black)));"
+palette_new="""    return InkWell(
+      onTap: () => setState(() => _current = i),
+      child: CircleAvatar(
+        radius: 19,
+        backgroundColor: i == _current ? Colors.blue : marked ? Colors.deepOrange : answered ? Colors.green : Colors.grey.shade300,
+        child: Text('${i + 1}', style: TextStyle(
+          color: (i == _current || marked || answered) ? Colors.white : Colors.black,
+        )),
+      ),
+    );"""
+if palette_old not in s:
+    raise SystemExit("Mock Test palette line did not match; refusing patch")
+s=s.replace(palette_old,palette_new,1)
 print("Exact Excel question loading and template-aware submission patched.")
