@@ -68,18 +68,39 @@ old3="'p_mode': 'mock'});"
 if old3 not in s: raise SystemExit("Mock Test submission call did not match; refusing patch")
 s=s.replace(old3,"'p_mode': 'mock', 'p_template_id': widget.templateId});",1)
 p.write_text(s)
-palette_old="    return InkWell(onTap: () => setState(() => _current = i), child: CircleAvatar(radius: 19, backgroundColor: i == _current ? Colors.blue : marked ? Colors.deepOrange : answered ? Colors.green : Colors.grey.shade300, child: Text('${i+1}', style: TextStyle(color: (i == _current || marked || answered) ? Colors.white : Colors.black)));"
-palette_new="""    return InkWell(
-      onTap: () => setState(() => _current = i),
-      child: CircleAvatar(
-        radius: 19,
-        backgroundColor: i == _current ? Colors.blue : marked ? Colors.deepOrange : answered ? Colors.green : Colors.grey.shade300,
-        child: Text('${i + 1}', style: TextStyle(
-          color: (i == _current || marked || answered) ? Colors.white : Colors.black,
-        )),
+import re
+palette_method="""  Widget _palette() {
+    return Container(
+      height: 76,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: _questions.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 6),
+        itemBuilder: (c, i) {
+          final id = _questions[i]['id'].toString();
+          final answered = _answers.containsKey(id);
+          final marked = _marked.contains(i);
+          return InkWell(
+            onTap: () => setState(() => _current = i),
+            child: CircleAvatar(
+              radius: 19,
+              backgroundColor: i == _current ? Colors.blue : marked ? Colors.deepOrange : answered ? Colors.green : Colors.grey.shade300,
+              child: Text(
+                '${i + 1}',
+                style: TextStyle(
+                  color: (i == _current || marked || answered) ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+          );
+        },
       ),
-    );"""
-if palette_old not in s:
-    raise SystemExit("Mock Test palette line did not match; refusing patch")
-s=s.replace(palette_old,palette_new,1)
+    );
+  }
+"""
+s=re.sub(r"  Widget _palette\(\)\s*=>.*?(?=\n\s*Widget _resultView\(\))",palette_method.rstrip(),s,count=1,flags=re.S)
+if "Widget _palette() {" not in s:
+    raise SystemExit("Could not replace Mock Test palette method")
+p.write_text(s)
 print("Exact Excel question loading and template-aware submission patched.")
