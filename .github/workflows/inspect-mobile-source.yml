@@ -1,0 +1,49 @@
+name: Inspect mobile mock-test integration source
+
+on:
+  push:
+    branches: [excel-question-bank-engine]
+    paths:
+      - '.github/workflows/inspect-mobile-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract project and collect mock-test source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source-audit/mobile source-audit/database
+          archive="$(find . -maxdepth 1 -name 'UP_Teacher_Master_*.zip' -print -quit)"
+          test -n "$archive" || { echo "Project archive missing"; exit 1; }
+          unzip -oq "$archive" -d extracted
+          find extracted -name pubspec.yaml -print > source-audit/pubspec-locations.txt
+          mobile_dir="$(dirname "$(head -n 1 source-audit/pubspec-locations.txt)")"
+          test -n "$mobile_dir" || { echo "Flutter source missing"; exit 1; }
+          find "$mobile_dir/lib" -type f -name '*.dart' -print0 |
+            xargs -0 grep -ilE 'mock.?test|test.?question|question.?selection' |
+            while IFS= read -r file; do
+              rel="${file#"$mobile_dir"/}"
+              mkdir -p "source-audit/mobile/$(dirname "$rel")"
+              cp "$file" "source-audit/mobile/$rel"
+            done
+          find extracted -type f \( -path '*/supabase/migrations/*.sql' -o -path '*/migrations/*.sql' \) -print |
+            while IFS= read -r file; do
+              rel="$(basename "$file")"
+              cp "$file" "source-audit/database/$rel"
+            done
+          find source-audit -type f -print | sort > source-audit/FILE_INDEX.txt
+          echo "Collected source files:"
+          cat source-audit/FILE_INDEX.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: uptm-mobile-mock-test-source-audit
+          path: source-audit/
+          if-no-files-found: error
+          retention-days: 7
