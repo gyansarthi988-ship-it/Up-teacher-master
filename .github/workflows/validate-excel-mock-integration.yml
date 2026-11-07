@@ -50,9 +50,14 @@ jobs:
           dart format lib/screens/mock_test_screen.dart
           flutter pub get
           flutter analyze --no-fatal-infos --no-fatal-warnings lib/screens/mock_test_screen.dart
+      - name: Diagnose Android v1 embedding references
+        working-directory: ${{ env.MOBILE_DIR }}
+        run: |
+          echo 'Project references:'
+          grep -RniE 'io\\.flutter\\.app|PluginRegistry\\.Registrar|registerWith\\(' android lib pubspec.yaml .flutter-plugins .flutter-plugins-dependencies 2>/dev/null || true
       - name: Build debug APK
         working-directory: ${{ env.MOBILE_DIR }}
-        run: flutter build apk --debug
+        run: flutter build apk --debug --verbose
       - uses: actions/upload-artifact@v4
         with:
           name: uptm-excel-mock-integration-debug-apk
