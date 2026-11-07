@@ -59,11 +59,7 @@ jobs:
         run: |
           if [ ! -f "$MOBILE_DIR/android/build.gradle" ] && [ ! -f "$MOBILE_DIR/android/build.gradle.kts" ]; then
             flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master /tmp/uptm_android_scaffold
-            cp /tmp/uptm_android_scaffold/android/build.gradle "$MOBILE_DIR/android/"
-            cp /tmp/uptm_android_scaffold/android/settings.gradle "$MOBILE_DIR/android/"
-            cp /tmp/uptm_android_scaffold/android/gradle.properties "$MOBILE_DIR/android/"
-            cp /tmp/uptm_android_scaffold/android/gradlew "$MOBILE_DIR/android/"
-            cp /tmp/uptm_android_scaffold/android/gradlew.bat "$MOBILE_DIR/android/"
+            find /tmp/uptm_android_scaffold/android -maxdepth 1 -type f -exec cp {} "$MOBILE_DIR/android/" \\;
             cp -R /tmp/uptm_android_scaffold/android/gradle "$MOBILE_DIR/android/"
           fi
       - name: Build debug APK
