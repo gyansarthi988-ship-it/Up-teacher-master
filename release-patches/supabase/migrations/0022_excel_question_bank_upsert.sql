@@ -32,14 +32,14 @@ begin
     insert into public.questions(exam_id,subject_id,topic_id,question_ref,question_hi,question_en,
       difficulty,marks,negative_marks,status,created_by)
     values(v_exam_id,v_subject_id,v_topic_id,v_ref,nullif(p_payload->>'question_hi',''),
-      nullif(p_payload->>'question_en',''),coalesce(nullif(p_payload->>'difficulty',''),'moderate'),
+      nullif(p_payload->>'question_en',''),coalesce(nullif(p_payload->>'difficulty',''),'moderate')::public.question_difficulty,
       coalesce(nullif(p_payload->>'marks','')::numeric,1),
       coalesce(nullif(p_payload->>'negative_marks','')::numeric,0),'draft',v_uid)
     returning id,status into v_question_id,v_status;
   else
     update public.questions set topic_id=v_topic_id,question_hi=nullif(p_payload->>'question_hi',''),
       question_en=nullif(p_payload->>'question_en',''),
-      difficulty=coalesce(nullif(p_payload->>'difficulty',''),difficulty),
+      difficulty=coalesce(nullif(p_payload->>'difficulty','')::public.question_difficulty,difficulty),
       marks=coalesce(nullif(p_payload->>'marks','')::numeric,marks),
       negative_marks=coalesce(nullif(p_payload->>'negative_marks','')::numeric,negative_marks)
     where id=v_question_id;
