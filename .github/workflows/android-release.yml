@@ -189,7 +189,9 @@ jobs:
         run: |
           if [ ! -f android/build.gradle ] && [ ! -f android/build.gradle.kts ]; then
             flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master /tmp/uptm_android_scaffold
-            find /tmp/uptm_android_scaffold/android -maxdepth 1 -type f -exec cp {} android/ \\;
+            for file in /tmp/uptm_android_scaffold/android/*; do
+              if [ -f "$file" ]; then cp "$file" android/; fi
+            done
             cp -R /tmp/uptm_android_scaffold/android/gradle android/
           fi
 
