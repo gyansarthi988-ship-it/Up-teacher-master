@@ -59,7 +59,9 @@ jobs:
         run: |
           if [ ! -f "$MOBILE_DIR/android/build.gradle" ] && [ ! -f "$MOBILE_DIR/android/build.gradle.kts" ]; then
             flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master /tmp/uptm_android_scaffold
-            find /tmp/uptm_android_scaffold/android -maxdepth 1 -type f -exec cp {} "$MOBILE_DIR/android/" \\;
+            for file in /tmp/uptm_android_scaffold/android/*; do
+              if [ -f "$file" ]; then cp "$file" "$MOBILE_DIR/android/"; fi
+            done
             cp -R /tmp/uptm_android_scaffold/android/gradle "$MOBILE_DIR/android/"
           fi
       - name: Build debug APK
