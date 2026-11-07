@@ -74,20 +74,27 @@ public class MainActivity extends Activity {
                 if (filePathCallback != null) filePathCallback.onReceiveValue(null);
                 filePathCallback = callback;
                 try {
-                    Intent intent;
-                    try {
-                        intent = params.createIntent();
-                    } catch (Exception chooserError) {
-                        intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        intent.setType("*/*");
-                    }
+                    // Use Android's Storage Access Framework directly. The default
+                    // WebView chooser intent can return through a transient verifier
+                    // activity on some Android 14/15 devices and recreate the host.
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("*/*");
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "application/vnd.ms-excel",
+                        "text/csv",
+                        "application/csv"
+                    });
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST);
                     return true;
                 } catch (Exception e) {
+                    android.util.Log.e("UPTM-WebView", "Unable to open document picker", e);
+                    if (filePathCallback != null) filePathCallback.onReceiveValue(null);
                     filePathCallback = null;
-                    return false;
+                    return true;
                 }
             }
 
@@ -128,6 +135,12 @@ public class MainActivity extends Activity {
             Uri[] results = null;
             if (resultCode == Activity.RESULT_OK && data != null) {
                 try {
+                    if (data.getData() != null && android.os.Build.VERSION.SDK_INT >= 19) {
+                        try {
+                            getContentResolver().takePersistableUriPermission(
+                                data.getData(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        } catch (Exception ignored) { }
+                    }
                     results = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
                 } catch (Exception parseError) {
                     Uri uri = data.getData();
