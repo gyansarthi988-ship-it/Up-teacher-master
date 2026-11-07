@@ -86,26 +86,10 @@ export default function AdminHome() {
   }
 
   useEffect(() => {
+    // Verify once on page load. Sign-in and sign-out explicitly update state;
+    // background auth events must not replace the import UI with a full-page
+    // verification screen when Android's document picker returns to the WebView.
     void refresh();
-
-    // Never call Supabase auth methods from inside onAuthStateChange.
-    // Supabase holds an internal auth lock while invoking the listener; calling
-    // getSession/getUser there can deadlock the WebView after returning from
-    // Android's document picker (or during token refresh).
-    let refreshTimer: number | undefined;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "TOKEN_REFRESHED") return;
-      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
-      refreshTimer = window.setTimeout(() => {
-        refreshTimer = undefined;
-        void refresh();
-      }, 0);
-    });
-
-    return () => {
-      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
-      subscription.unsubscribe();
-    };
   }, []);
 
   async function signIn(event: FormEvent) {
