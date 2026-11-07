@@ -1,0 +1,61 @@
+name: Validate Excel Question Bank and Mock Test Integration
+on:
+  push:
+    branches: [excel-question-bank-engine]
+    paths:
+      - 'release-patches/mobile/**'
+      - 'release-patches/supabase/migrations/0022*'
+      - 'release-patches/supabase/migrations/0023*'
+      - 'admin/app/components/QuestionBulkImportCenter.tsx'
+      - '.github/workflows/validate-excel-mock-integration.yml'
+  pull_request:
+    branches: [admin-apk-wrapper]
+    paths:
+      - 'release-patches/mobile/**'
+      - 'release-patches/supabase/migrations/0022*'
+      - 'release-patches/supabase/migrations/0023*'
+      - 'admin/app/components/QuestionBulkImportCenter.tsx'
+      - '.github/workflows/validate-excel-mock-integration.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract mobile project
+        run: |
+          unzip -oq UP_Teacher_Master_Launch_Files.zip -d .
+          mobile_dir="$(find . -name pubspec.yaml -not -path './.git/*' -exec grep -lE '^[[:space:]]*flutter:' {} \; | head -1 | xargs dirname)"
+          test -n "$mobile_dir"
+          echo "MOBILE_DIR=$mobile_dir" >> "$GITHUB_ENV"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: stable
+          cache: true
+      - name: Apply integration patch and migrations
+        run: |
+          python3 release-patches/mobile/patch_mock_test_exact.py "$MOBILE_DIR/lib/screens/mock_test_screen.dart"
+          mkdir -p "$MOBILE_DIR/supabase/migrations"
+          cp release-patches/supabase/migrations/0022_excel_question_bank_upsert.sql "$MOBILE_DIR/supabase/migrations/"
+          cp release-patches/supabase/migrations/0023_excel_mock_test_assignments.sql "$MOBILE_DIR/supabase/migrations/"
+      - name: Validate Dart formatting and analyze
+        working-directory: ${{ env.MOBILE_DIR }}
+        run: |
+          dart format --output=none --set-exit-if-changed lib/screens/mock_test_screen.dart
+          flutter pub get
+          flutter analyze lib/screens/mock_test_screen.dart
+      - name: Build debug APK
+        working-directory: ${{ env.MOBILE_DIR }}
+        run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: uptm-excel-mock-integration-debug-apk
+          path: ${{ env.MOBILE_DIR }}/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
