@@ -33,6 +33,14 @@ jobs:
               mkdir -p "source-audit/mobile/$(dirname "$rel")"
               cp "$file" "source-audit/mobile/$rel"
             done
+          if [ -d "$mobile_dir/android" ]; then
+            find "$mobile_dir/android" -type f \( -name 'AndroidManifest.xml' -o -name 'MainActivity.java' -o -name 'MainActivity.kt' -o -name 'build.gradle' -o -name 'build.gradle.kts' \) -print |
+              while IFS= read -r file; do
+                rel="${file#"$mobile_dir"/}"
+                mkdir -p "source-audit/android/$(dirname "$rel")"
+                cp "$file" "source-audit/android/$rel"
+              done
+          fi
           find extracted -type f \( -path '*/supabase/migrations/*.sql' -o -path '*/migrations/*.sql' \) -print |
             while IFS= read -r file; do
               rel="$(basename "$file")"
