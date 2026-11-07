@@ -184,6 +184,19 @@ jobs:
               p.write_text(text)
           PY
 
+      - name: Restore missing root Android Gradle scaffold
+        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
+        run: |
+          if [ ! -f android/build.gradle ] && [ ! -f android/build.gradle.kts ]; then
+            flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master /tmp/uptm_android_scaffold
+            cp /tmp/uptm_android_scaffold/android/build.gradle android/
+            cp /tmp/uptm_android_scaffold/android/settings.gradle android/
+            cp /tmp/uptm_android_scaffold/android/gradle.properties android/
+            cp /tmp/uptm_android_scaffold/android/gradlew android/
+            cp /tmp/uptm_android_scaffold/android/gradlew.bat android/
+            cp -R /tmp/uptm_android_scaffold/android/gradle android/
+          fi
+
       - name: Align Java and Kotlin JVM targets to 17
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
         shell: bash
