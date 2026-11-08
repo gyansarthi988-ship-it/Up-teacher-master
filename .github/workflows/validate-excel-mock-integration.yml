@@ -41,6 +41,7 @@ jobs:
       - name: Apply integration patch and migrations
         run: |
           python3 release-patches/mobile/patch_mock_test_exact.py "$MOBILE_DIR/lib/screens/mock_test_screen.dart"
+          python3 release-patches/mobile/patch_legacy_compile_errors.py "$MOBILE_DIR"
           mkdir -p "$MOBILE_DIR/supabase/migrations"
           cp release-patches/supabase/migrations/0022_excel_question_bank_upsert.sql "$MOBILE_DIR/supabase/migrations/"
           cp release-patches/supabase/migrations/0023_excel_mock_test_assignments.sql "$MOBILE_DIR/supabase/migrations/"
