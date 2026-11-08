@@ -50,3 +50,5 @@ replace(
     "LinearProgressIndicator(value:pct.toDouble())",
     "syllabus progress numeric type",
 )
+
+# Keep patch matching explicit to the current bundled mobile source revision.
