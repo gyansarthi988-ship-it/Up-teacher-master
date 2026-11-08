@@ -73,35 +73,29 @@ jobs:
         run: |
           python3 - "$MOBILE_DIR/android/app" <<'PY'
           from pathlib import Path
-          import re, sys
+          import sys
           app = Path(sys.argv[1])
-          gradle = next((p for p in (app / "build.gradle", app / "build.gradle.kts") if p.exists()), None)
-          if gradle is None:
+          gradle = app / "build.gradle"
+          if not gradle.exists():
+              gradle = app / "build.gradle.kts"
+          if not gradle.exists():
               raise SystemExit("Android app Gradle file not found")
           s = gradle.read_text()
-          is_kts = gradle.suffix == ".kts"
-          s = s.replace("JavaVersion.VERSION_1_8", "JavaVersion.VERSION_17")
-          s = re.sub(r"""(jvmTarget\\s*=\\s*)["']1\\.8["']""", r"""\\1"17" """.strip(), s)
-          if is_kts:
-              compile_block = """    compileOptions {
-                  sourceCompatibility = JavaVersion.VERSION_17
-                  targetCompatibility = JavaVersion.VERSION_17
-              }
-          """
-              kotlin_block = """    kotlinOptions { jvmTarget = "17" }
-          """
-          else:
-              compile_block = """    compileOptions {
+          if "compileOptions" not in s:
+              block = """android {
+              compileOptions {
                   sourceCompatibility JavaVersion.VERSION_17
                   targetCompatibility JavaVersion.VERSION_17
               }
           """
-              kotlin_block = """    kotlinOptions { jvmTarget = '17' }
-          """
-          if "compileOptions" not in s:
-              s = re.sub(r"android\\s*\\{", lambda m: m.group(0) + "\\n" + compile_block, s, count=1)
-          if "kotlinOptions" not in s and "compilerOptions" not in s:
-              s = re.sub(r"android\\s*\\{", lambda m: m.group(0) + "\\n" + kotlin_block, s, count=1)
+              s = s.replace("android {", block, 1)
+          else:
+              s = s.replace("JavaVersion.VERSION_1_8", "JavaVersion.VERSION_17")
+          if "kotlinOptions" not in s:
+              s = s.replace("android {", "android {\\n    kotlinOptions { jvmTarget = '17' }", 1)
+          else:
+              s = s.replace("jvmTarget = '1.8'", "jvmTarget = '17'")
+              s = s.replace('jvmTarget = "1.8"', 'jvmTarget = "17"')
           gradle.write_text(s)
           print(f"Aligned Java/Kotlin targets to 17 in {gradle}")
           PY
