@@ -20,13 +20,20 @@ replace(
     "premium placeholder",
 ) if False else None
 
-# Close the first membership Card before the plan list.
-replace(
-    "lib/screens/premium_membership_screen.dart",
-    "सामग्री अनलॉक करें।'))]))),const SizedBox(height:12)",
-    "सामग्री अनलॉक करें।'))])),const SizedBox(height:12)",
-    "premium membership card closure",
-)
+# Close the first membership Card before the plan list. Use stable English anchor
+# because Hindi punctuation/Unicode may vary between bundled source revisions.
+premium = root / "lib/screens/premium_membership_screen.dart"
+premium_source = premium.read_text()
+anchor = "Unlock premium mock tests and study resources."
+if premium_source.count(anchor) != 1:
+    raise SystemExit("premium membership description anchor is not unique")
+anchor_pos = premium_source.index(anchor)
+boundary = premium_source.index(",const SizedBox(height:12)", anchor_pos)
+prefix = premium_source[:boundary]
+if not prefix.endswith("))]))"):
+    raise SystemExit("premium membership Card boundary has unexpected structure")
+premium.write_text(prefix + ")" + premium_source[boundary:])
+print("Patched premium membership Card closure")
 
 # Close Card after ListTile in each mapped learning-plan task.
 replace(
