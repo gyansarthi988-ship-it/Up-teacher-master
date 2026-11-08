@@ -1,0 +1,119 @@
+name: Validate Excel Question Bank and Mock Test Integration
+on:
+  push:
+    branches: [excel-question-bank-engine]
+    paths:
+      - 'release-patches/mobile/**'
+      - 'release-patches/supabase/migrations/0022*'
+      - 'release-patches/supabase/migrations/0023*'
+      - 'admin/app/components/QuestionBulkImportCenter.tsx'
+      - '.github/workflows/validate-excel-mock-integration.yml'
+  pull_request:
+    branches: [admin-apk-wrapper]
+    paths:
+      - 'release-patches/mobile/**'
+      - 'release-patches/supabase/migrations/0022*'
+      - 'release-patches/supabase/migrations/0023*'
+      - 'admin/app/components/QuestionBulkImportCenter.tsx'
+      - '.github/workflows/validate-excel-mock-integration.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract mobile project
+        run: |
+          unzip -oq UP_Teacher_Master_Launch_Files.zip -d .
+          mobile_dir="$(find . -name pubspec.yaml -not -path './.git/*' -exec grep -lE '^[[:space:]]*flutter:' {} \; | head -1 | xargs dirname)"
+          test -n "$mobile_dir"
+          echo "MOBILE_DIR=$mobile_dir" >> "$GITHUB_ENV"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: stable
+          cache: true
+      - name: Apply integration patch and migrations
+        run: |
+          cp release-patches/mobile/lib/screens/auth_screen.dart "$MOBILE_DIR/lib/screens/auth_screen.dart"
+          python3 release-patches/mobile/patch_mock_test_exact.py "$MOBILE_DIR/lib/screens/mock_test_screen.dart"
+          python3 release-patches/mobile/patch_legacy_compile_errors.py "$MOBILE_DIR"
+          mkdir -p "$MOBILE_DIR/supabase/migrations"
+          cp release-patches/supabase/migrations/0022_excel_question_bank_upsert.sql "$MOBILE_DIR/supabase/migrations/"
+          cp release-patches/supabase/migrations/0023_excel_mock_test_assignments.sql "$MOBILE_DIR/supabase/migrations/"
+      - name: Validate Dart formatting and analyze
+        working-directory: ${{ env.MOBILE_DIR }}
+        run: |
+          dart format lib/screens/mock_test_screen.dart
+          flutter pub get
+          flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Diagnose Android v1 embedding references
+        working-directory: ${{ env.MOBILE_DIR }}
+        run: |
+          echo 'Project references:'
+          grep -RniE 'io\\.flutter\\.app|PluginRegistry\\.Registrar|registerWith\\(' android lib pubspec.yaml .flutter-plugins .flutter-plugins-dependencies 2>/dev/null || true
+      - name: Restore missing root Android Gradle scaffold
+        run: |
+          if [ ! -f "$MOBILE_DIR/android/build.gradle" ] && [ ! -f "$MOBILE_DIR/android/build.gradle.kts" ]; then
+            flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master /tmp/uptm_android_scaffold
+            for file in /tmp/uptm_android_scaffold/android/*; do
+              if [ -f "$file" ]; then cp "$file" "$MOBILE_DIR/android/"; fi
+            done
+            cp -R /tmp/uptm_android_scaffold/android/gradle "$MOBILE_DIR/android/"
+            # Restore the Android app resources referenced by AndroidManifest.xml.
+            # Keep any project-specific resources; copy scaffold defaults only when absent.
+            mkdir -p "$MOBILE_DIR/android/app/src/main/res"
+            cp -Rn /tmp/uptm_android_scaffold/android/app/src/main/res/. "$MOBILE_DIR/android/app/src/main/res/"
+          fi
+      - name: Align Android Java and Kotlin JVM targets
+        run: |
+          python3 - "$MOBILE_DIR/android/app" <<'PY'
+          from pathlib import Path
+          import sys
+          app = Path(sys.argv[1])
+          gradle = next((p for p in (app / "build.gradle", app / "build.gradle.kts") if p.exists()), None)
+          if gradle is None:
+              raise SystemExit("Android app Gradle file not found")
+          lines = gradle.read_text().splitlines()
+          if not any("compileOptions" in line for line in lines):
+              idx = next((i for i, line in enumerate(lines) if line.strip() == "android {"), None)
+              if idx is None:
+                  raise SystemExit("android block not found in app Gradle file")
+              lines[idx+1:idx+1] = [
+                  "    compileOptions {",
+                  "        sourceCompatibility JavaVersion.VERSION_17",
+                  "        targetCompatibility JavaVersion.VERSION_17",
+                  "    }",
+              ]
+          else:
+              lines = [line.replace("JavaVersion.VERSION_1_8", "JavaVersion.VERSION_17") for line in lines]
+          if not any("kotlinOptions" in line or "compilerOptions" in line for line in lines):
+              idx = next((i for i, line in enumerate(lines) if line.strip() == "android {"), None)
+              lines[idx+1:idx+1] = ["    kotlinOptions {", "        jvmTarget = '17'", "    }"]
+          else:
+              lines = [line.replace("jvmTarget = '1.8'", "jvmTarget = '17'").replace('jvmTarget = "1.8"', 'jvmTarget = "17"') for line in lines]
+          gradle.write_text("\n".join(lines) + "\n")
+          print(f"Aligned Java/Kotlin targets to 17 in {gradle}")
+          PY
+      - name: Print source context for legacy compile errors
+        working-directory: ${{ env.MOBILE_DIR }}
+        run: |
+          for spec in "lib/screens/premium_membership_screen.dart:18:26" "lib/screens/ai_study_mentor_screen.dart:78:88" "lib/screens/profile_screen.dart:24:34" "lib/screens/syllabus_tracker_screen.dart:52:64"; do
+            file="${spec%%:*}"; rest="${spec#*:}"; start="${rest%%:*}"; end="${rest##*:}"
+            echo "===== $file:$start-$end ====="
+            nl -ba "$file" | sed -n "${start},${end}p"
+          done
+      - name: Build debug APK
+        working-directory: ${{ env.MOBILE_DIR }}
+        run: flutter build apk --debug --split-per-abi --verbose
+      - uses: actions/upload-artifact@v4
+        with:
+          name: uptm-excel-mock-integration-debug-apk
+          path: ${{ env.MOBILE_DIR }}/build/app/outputs/flutter-apk/*-debug.apk
+          if-no-files-found: error
+          retention-days: 14

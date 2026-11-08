@@ -59,6 +59,8 @@ jobs:
           mkdir -p supabase/migrations
           cp release-patches/supabase/migrations/0020_username_registration.sql supabase/migrations/0020_username_registration.sql
           cp release-patches/supabase/migrations/0021_spaced_revision_rpc_repair.sql supabase/migrations/0021_spaced_revision_rpc_repair.sql
+          cp release-patches/supabase/migrations/0022_excel_question_bank_upsert.sql supabase/migrations/0022_excel_question_bank_upsert.sql
+          cp release-patches/supabase/migrations/0023_excel_mock_test_assignments.sql supabase/migrations/0023_excel_mock_test_assignments.sql
           cp release-patches/mobile/lib/screens/profile_screen.dart "$mobile_dir/lib/screens/profile_screen.dart"
           cp release-patches/mobile/lib/screens/syllabus_tracker_screen.dart "$mobile_dir/lib/screens/syllabus_tracker_screen.dart"
           cp release-patches/mobile/lib/screens/premium_membership_screen.dart "$mobile_dir/lib/screens/premium_membership_screen.dart"
@@ -106,6 +108,8 @@ jobs:
           ai.write_text(text.replace(old, new, 1))
 
           mock = Path("${{ steps.locate_mobile.outputs.mobile_dir }}/lib/screens/mock_test_screen.dart")
+          import subprocess
+          subprocess.run(["python3", "release-patches/mobile/patch_mock_test_exact.py", str(mock)], check=True)
           text = mock.read_text()
           old = next((line for line in text.splitlines() if "return InkWell(onTap: () => setState(() => _current = i)" in line), None)
           if old is None:
@@ -179,6 +183,17 @@ jobs:
               text = text.replace("</activity>", intent + "\n                </activity>", 1)
               p.write_text(text)
           PY
+
+      - name: Restore missing root Android Gradle scaffold
+        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
+        run: |
+          if [ ! -f android/build.gradle ] && [ ! -f android/build.gradle.kts ]; then
+            flutter create --platforms=android --org com.rsglobalacademy --project-name up_teacher_master /tmp/uptm_android_scaffold
+            for file in /tmp/uptm_android_scaffold/android/*; do
+              if [ -f "$file" ]; then cp "$file" android/; fi
+            done
+            cp -R /tmp/uptm_android_scaffold/android/gradle android/
+          fi
 
       - name: Align Java and Kotlin JVM targets to 17
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
@@ -276,7 +291,7 @@ jobs:
 
       - name: Build signed APK
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: flutter build apk --release --dart-define=PLAY_STORE_BUILD=false --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+        run: flutter build apk --release --split-per-abi --dart-define=PLAY_STORE_BUILD=false --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Upload APK and AAB
         uses: actions/upload-artifact@v4
@@ -284,6 +299,6 @@ jobs:
           name: up-teacher-master-release-${{ github.run_number }}
           path: |
             ${{ steps.locate_mobile.outputs.mobile_dir }}/build/app/outputs/bundle/release/app-release.aab
-            ${{ steps.locate_mobile.outputs.mobile_dir }}/build/app/outputs/flutter-apk/app-release.apk
+            ${{ steps.locate_mobile.outputs.mobile_dir }}/build/app/outputs/flutter-apk/*-release.apk
           if-no-files-found: error
           retention-days: 30
