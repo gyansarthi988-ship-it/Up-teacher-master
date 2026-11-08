@@ -40,6 +40,7 @@ jobs:
           cache: true
       - name: Apply integration patch and migrations
         run: |
+          cp release-patches/mobile/lib/screens/auth_screen.dart "$MOBILE_DIR/lib/screens/auth_screen.dart"
           python3 release-patches/mobile/patch_mock_test_exact.py "$MOBILE_DIR/lib/screens/mock_test_screen.dart"
           python3 release-patches/mobile/patch_legacy_compile_errors.py "$MOBILE_DIR"
           mkdir -p "$MOBILE_DIR/supabase/migrations"
