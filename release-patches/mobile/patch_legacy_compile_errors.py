@@ -24,7 +24,7 @@ replace(
 replace(
     "lib/screens/premium_membership_screen.dart",
     "केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।')),const SizedBox(height:22)",
-    "केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।'))]))))),const SizedBox(height:22)",
+    "केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।'))]))),const SizedBox(height:22)",
     "premium membership widget nesting",
 )
 
