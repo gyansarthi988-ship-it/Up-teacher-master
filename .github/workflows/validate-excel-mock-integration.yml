@@ -109,10 +109,10 @@ jobs:
           done
       - name: Build debug APK
         working-directory: ${{ env.MOBILE_DIR }}
-        run: flutter build apk --debug --verbose
+        run: flutter build apk --debug --split-per-abi --verbose
       - uses: actions/upload-artifact@v4
         with:
           name: uptm-excel-mock-integration-debug-apk
-          path: ${{ env.MOBILE_DIR }}/build/app/outputs/flutter-apk/app-debug.apk
+          path: ${{ env.MOBILE_DIR }}/build/app/outputs/flutter-apk/*-debug.apk
           if-no-files-found: error
           retention-days: 14
