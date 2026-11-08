@@ -2,29 +2,45 @@
 
 Bilingual Hindi/English exam-preparation platform for UP Super TET, UP TGT, UP PRT and UP Junior Level.
 
+## Source of truth
+
+The project source archive `UP_Teacher_Master_Launch_Files.zip` is stored in this repository. Development and release builds should use this repository copy; there is no need to re-upload the ZIP for each code change.
+
+The release workflow extracts the archive, applies maintained fixes from `release-patches/`, and builds Android APK/AAB artifacts through GitHub Actions.
+
 ## Project components
 
-- `mobile/` — Flutter Android student application
-- `admin/` — Next.js administration panel
-- `supabase/migrations/` — database schema and migration history
-- `.github/workflows/` — automated Android release builds
-- `docs/` — setup, operations and release documentation
+- Flutter Android student application (inside the source archive)
+- Next.js administration panel (inside the source archive)
+- Supabase migrations (inside the source archive and maintained patches)
+- `.github/workflows/` — automated Android release build
 
-## Repository status
+## Making changes
 
-The GitHub connection is verified and this repository is writable. At the time of this commit, the repository contains only this README; the full application source tree has not yet been uploaded. This is documentation only, not a working application or release.
+1. Update the relevant source file in the project archive or maintained patch files.
+2. Commit the change to `main`.
+3. Run **Actions → Build UP Teacher Master Release APK and AAB → Run workflow** (or use the automatic push trigger for configured paths).
+4. Download the APK from the completed workflow run's Artifacts section.
 
-## Release safety
+## Login changes
 
-Never commit `.env` files, Supabase service-role keys, Android keystores, signing passwords, Firebase private credentials or other secrets. Configure production values as GitHub Actions repository secrets. Only the public Supabase anon/publishable key may be used by the client app.
+The simplified username/password registration screen is maintained at:
+`release-patches/mobile/lib/screens/auth_screen.dart`
 
-## Planned release outputs
+The associated Supabase migration is:
+`release-patches/supabase/migrations/0020_username_registration.sql`
 
-- Signed APK for direct distribution
-- Signed AAB for Google Play
+Apply the SQL migration to the connected Supabase project and disable email confirmation for the username-alias registration flow before releasing.
 
-Do not publish either artifact until production configuration, privacy disclosures, Play Console requirements and manual device testing are complete.
+## Secrets and release signing
 
-## Next step
+Never commit `.env` files, Supabase service-role keys, Android keystores, signing passwords, Firebase private credentials or other secrets. Configure required values as GitHub Actions repository secrets:
 
-Upload the complete project source folders (`mobile/`, `admin/`, `supabase/`, `docs/`) and the `.github/workflows/` release workflow to the repository root. The build workflow cannot run successfully until those files and the required GitHub Actions secrets and Android upload keystore are present.
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `ANDROID_KEYSTORE_BASE64`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+- `ANDROID_STORE_PASSWORD`
+
+The workflow cannot produce a signed production release until these secrets are configured. Do not publish until production configuration, privacy disclosures, Play Console requirements and device testing are complete.
