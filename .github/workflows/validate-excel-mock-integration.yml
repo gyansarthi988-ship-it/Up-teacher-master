@@ -50,7 +50,7 @@ jobs:
         run: |
           dart format lib/screens/mock_test_screen.dart
           flutter pub get
-          flutter analyze --no-fatal-infos --no-fatal-warnings lib/screens/mock_test_screen.dart
+          flutter analyze --no-fatal-infos --no-fatal-warnings
       - name: Diagnose Android v1 embedding references
         working-directory: ${{ env.MOBILE_DIR }}
         run: |
