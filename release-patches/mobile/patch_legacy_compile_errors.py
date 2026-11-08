@@ -23,7 +23,7 @@ replace(
 # Close the first membership Card before the plan list.
 replace(
     "lib/screens/premium_membership_screen.dart",
-    "सामग्री अनलॉक करें।'))])),const SizedBox(height:12)",
+    "सामग्री अनलॉक करें।'))]))),const SizedBox(height:12)",
     "सामग्री अनलॉक करें।'))])),const SizedBox(height:12)",
     "premium membership card closure",
 )
