@@ -8,6 +8,7 @@ on:
       - '.github/workflows/android-release.yml'
       - 'UP_Teacher_Master_Launch_Files.zip'
       - 'release-patches/**'
+      - 'README.md'
 
 permissions:
   contents: read
