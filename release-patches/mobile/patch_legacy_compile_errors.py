@@ -20,12 +20,12 @@ replace(
     "premium placeholder",
 ) if False else None
 
-# Close the outer Card/ Padding nesting before the following plan heading.
+# Close the first membership Card before the plan list.
 replace(
     "lib/screens/premium_membership_screen.dart",
-    "केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।')),const SizedBox(height:22)",
-    "केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।'))]))),const SizedBox(height:22)",
-    "premium membership widget nesting",
+    "सामग्री अनलॉक करें।'))])),const SizedBox(height:12)",
+    "सामग्री अनलॉक करें।'))])),const SizedBox(height:12)",
+    "premium membership card closure",
 )
 
 # Close Card after ListTile in each mapped learning-plan task.
