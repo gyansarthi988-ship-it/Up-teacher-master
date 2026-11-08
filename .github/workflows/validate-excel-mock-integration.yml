@@ -64,6 +64,10 @@ jobs:
               if [ -f "$file" ]; then cp "$file" "$MOBILE_DIR/android/"; fi
             done
             cp -R /tmp/uptm_android_scaffold/android/gradle "$MOBILE_DIR/android/"
+            # Restore the Android app resources referenced by AndroidManifest.xml.
+            # Keep any project-specific resources; copy scaffold defaults only when absent.
+            mkdir -p "$MOBILE_DIR/android/app/src/main/res"
+            cp -Rn /tmp/uptm_android_scaffold/android/app/src/main/res/. "$MOBILE_DIR/android/app/src/main/res/"
           fi
       - name: Print source context for legacy compile errors
         working-directory: ${{ env.MOBILE_DIR }}
