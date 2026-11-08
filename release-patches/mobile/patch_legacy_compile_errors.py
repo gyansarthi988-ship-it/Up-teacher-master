@@ -23,8 +23,8 @@ replace(
 # Close the outer Card/ Padding nesting before the following plan heading.
 replace(
     "lib/screens/premium_membership_screen.dart",
-    "server webhook.','पेमेंट प्रोवाइडर का सत्यापित सर्वर वेबहुक प्राप्त होगा। केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।')),const SizedBox(height:22)",
-    "server webhook.','पेमेंट प्रोवाइडर का सत्यापित सर्वर वेबहुक प्राप्त होगा। केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।'))),const SizedBox(height:22)",
+    "वेबहुक प्राप्त होगा। केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।')),const SizedBox(height:22)",
+    "वेबहुक प्राप्त होगा। केवल पेमेंट सक्सेस स्क्रीन से एक्सेस नहीं मिलेगा।'))),const SizedBox(height:22)",
     "premium membership widget nesting",
 )
 
