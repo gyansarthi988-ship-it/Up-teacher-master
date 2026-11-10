@@ -66,3 +66,40 @@ button:focus-visible,a:focus-visible{outline:3px solid #8da7f2;outline-offset:2p
   .stat-card strong{font-size:23px}
   .metric-label{font-size:10px}
 }
+
+
+/* Study material library — visual resource cards */
+.material-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.material-card{display:grid;grid-template-columns:112px minmax(0,1fr);overflow:hidden;border:1px solid #e6ebf3;border-radius:15px;background:#fff;box-shadow:0 5px 18px rgba(22,39,72,.045);transition:transform .18s ease,box-shadow .18s ease}
+.material-card:hover{transform:translateY(-2px);box-shadow:0 13px 28px rgba(22,39,72,.09)}
+.material-cover{min-height:190px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;overflow:hidden;background:radial-gradient(circle at 15% 15%,#718fe5 0,transparent 42%),linear-gradient(150deg,#243d70,#142642 75%);color:#dce6ff}
+.material-cover:after{content:"";position:absolute;width:150px;height:150px;border:1px solid #ffffff18;border-radius:50%;right:-78px;bottom:-60px;box-shadow:0 0 0 18px #ffffff08,0 0 0 38px #ffffff06}
+.material-pdf-art{width:57px;height:66px;filter:drop-shadow(0 8px 10px #07152d55);position:relative;z-index:1}
+.material-cover>span{font-size:8px;letter-spacing:.15em;font-weight:800;color:#b9c9ee;position:relative;z-index:1}
+.material-card-body{min-width:0;padding:14px;display:flex;flex-direction:column;align-items:flex-start}
+.material-status,.material-tier{display:inline-flex;align-items:center;border-radius:30px;padding:5px 8px;font-size:9px;font-weight:800;text-transform:capitalize}
+.material-status.is-published{background:#eaf8f1;color:#18845e}.material-status.is-draft{background:#fff5e7;color:#a86a18}
+.material-tier{background:#f0f3fa;color:#64738e}
+.material-card-body h3{font-size:13px;line-height:1.45;margin:11px 0 3px;color:#1c2c49}
+.material-title-hi{font-size:11px;color:#77849a;margin:0 0 8px}
+.material-meta{display:flex;flex-wrap:wrap;gap:7px 12px;margin:9px 0 0;color:#71809a;font-size:9px}
+.material-id{font-size:9px;color:#a1aabd;margin:8px 0 10px}
+.material-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;width:100%}
+.material-action-primary,.material-action-secondary,.material-action-publish{display:inline-flex;align-items:center;justify-content:center;gap:5px;border-radius:8px;padding:8px 10px;font-size:9px;font-weight:800;transition:all .15s ease}
+.material-action-primary{border:1px solid #2d4fae;background:linear-gradient(135deg,#4568d8,#294ca8);color:white}
+.material-action-primary:hover{filter:brightness(.96);transform:translateY(-1px)}
+.material-action-secondary{border:1px solid #e0e6f0;background:#fff;color:#52627e}
+.material-action-secondary:hover{border-color:#b8c7eb;background:#f7f9ff}
+.material-action-publish{border:1px solid #bde8d4;background:#effaf4;color:#16845b}
+.material-action-primary:disabled,.material-action-publish:disabled{opacity:.5;cursor:not-allowed}
+.material-edit-backdrop{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:18px;background:rgba(13,25,46,.52);backdrop-filter:blur(5px)}
+.material-edit-panel{width:min(100%,520px);max-height:90vh;overflow:auto;border:1px solid #e5eaf2;border-radius:20px;background:white;padding:24px;box-shadow:0 28px 80px #08152d45;display:grid;gap:14px}
+.material-edit-panel h3{font-size:19px;margin:0;color:#1c2c49}
+.material-edit-panel label{display:grid;gap:6px;color:#52627e;font-size:10px;font-weight:800}
+.material-edit-panel input,.material-edit-panel select{width:100%;border:1px solid #dfe5ee;border-radius:9px;padding:11px;background:#fbfcfe;color:#263650;font-size:12px}
+.material-edit-panel input:focus,.material-edit-panel select:focus{outline:3px solid #6782d91c;border-color:#7892e2}
+.material-edit-kicker{font-size:8px;font-weight:900;letter-spacing:.18em;color:#637bc8;margin:0 0 6px}
+.material-close{width:30px;height:30px;border:1px solid #e5eaf2;background:#f8faff;border-radius:9px;color:#71809a;font-size:19px;line-height:1}
+.material-edit-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:8px;border-top:1px solid #eef1f6}
+@media(max-width:980px){.material-library-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.material-card{grid-template-columns:82px minmax(0,1fr)}.material-cover{min-height:200px}.material-pdf-art{width:48px;height:58px}.material-card-body{padding:11px}.material-actions>*{flex:1 1 auto}.material-edit-panel{padding:18px}}
