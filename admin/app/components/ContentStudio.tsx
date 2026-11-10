@@ -285,7 +285,7 @@ export default function ContentStudio() {
         title_hi:String(form.get("title_hi")||"").trim()||null,
         exam_id:String(form.get("exam_id")||"")||null,
         subject_id:String(form.get("subject_id")||"")||null,
-        access_tier:String(form.get("access_tier")||"free")
+        access_tier:"free"
       }).eq("id",editingMaterial.id);
       if(error)throw error;
       setEditingMaterial(null);
@@ -476,7 +476,7 @@ export default function ContentStudio() {
           <input name="title_hi" placeholder="शीर्षक (हिन्दी)" className={field}/>
           <select name="exam_id" className={field}><option value="">All / no exam selected</option>{exams.map(x=><option key={x.id} value={x.id}>{x.name_en}</option>)}</select>
           <select name="subject_id" className={field}><option value="">No subject selected</option>{subjects.map(x=><option key={x.id} value={x.id}>{x.name_en}</option>)}</select>
-          <select name="access_tier" className={field}><option value="free">Free</option><option value="premium">Premium</option></select>
+          <select name="access_tier" className={field} value="free" disabled><option value="free">Free access</option></select>
           <input name="file" type="file" accept="application/pdf,.pdf" required className={field}/>
         </div>
         <p className="text-xs text-slate-500">PDF only · Maximum 50 MB · Uploaded as Draft. Student download/signed-link entitlement flow is implemented in a later phase.</p>
@@ -516,7 +516,7 @@ export default function ContentStudio() {
             <label>Title (English)<input name="title_en" defaultValue={editingMaterial.title_en||""} placeholder="Enter English title"/></label>
             <label>शीर्षक (हिन्दी)<input name="title_hi" defaultValue={editingMaterial.title_hi||""} placeholder="हिन्दी शीर्षक"/></label>
             <div className="grid gap-3 sm:grid-cols-2"><label>Course / Examination<select name="exam_id" defaultValue={editingMaterial.exam_id||""}><option value="">All courses</option>{exams.map(x=><option key={x.id} value={x.id}>{x.name_en}</option>)}</select></label><label>Subject<select name="subject_id" defaultValue={editingMaterial.subject_id||""}><option value="">No subject</option>{subjects.map(x=><option key={x.id} value={x.id}>{x.name_en}</option>)}</select></label></div>
-            <label>Access level<select name="access_tier" defaultValue={editingMaterial.access_tier==="premium"?"premium":"free"}><option value="free">Free</option><option value="premium">Premium</option></select></label>
+            <label>Access level<select name="access_tier" value="free" disabled><option value="free">Free access</option></select></label>
             <div className="material-edit-actions"><button type="button" className="material-action-secondary" onClick={()=>setEditingMaterial(null)}>Cancel</button><button type="submit" className="material-action-primary" disabled={busy}>{busy?"Saving…":"Save changes"}</button></div>
           </form>
         </div>}
