@@ -256,7 +256,11 @@ export default function ContentStudio() {
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {upTgt2026.general_knowledge.map((unit:any)=><div key={unit.unit} className="rounded-lg bg-white p-3"><b className="block text-sm">{unit.unit}</b><span className="text-xs text-slate-600">{unit.unit_hi}</span><span className="mt-1 block text-xs text-indigo-700">{unit.topics.length} topic groups</span></div>)}
           </div>
-          <p className="mt-3 text-xs text-amber-800">Common GK outline added. Select and transcribe the exact subject PDF before publishing.</p>
+          <div className="mt-3 rounded-lg bg-white p-3">
+            <b className="text-sm">Subject-wise syllabus checklist</b>
+            <div className="mt-2 flex flex-wrap gap-2">{upTgt2026.subjects.map((subject:any)=><span key={subject.code} className="rounded-full border border-slate-200 px-2 py-1 text-xs text-slate-700">{subject.name_en} / {subject.name_hi}</span>)}</div>
+          </div>
+          <p className="mt-3 text-xs text-amber-800">Common GK outline is preliminary. Each subject's official PDF still needs full transcription and review before publishing.</p>
           <a className="mt-2 inline-block text-xs font-semibold text-indigo-800 underline" href={upTgt2026.source.official_page} target="_blank" rel="noreferrer">Open official UPESSC syllabus index</a>
         </article>
         <article className="rounded-xl border border-amber-200 bg-amber-50 p-4">
