@@ -198,7 +198,7 @@ jobs:
           mock = root / "mock_test_screen.dart"
           s = mock.read_text()
           old = """      final rows = await _db.from('questions').select('id,subject_id,topic_id,difficulty,question_hi,question_en,marks,negative_marks,question_options(id,option_key,text_hi,text_en,display_order)')
-        .eq('exam_id', widget.examId).eq('status', 'published').limit(2000);"""
+                    .eq('exam_id', widget.examId).eq('status', 'published').limit(2000);"""
           new = """      final rows = await _db.rpc('get_published_exam_questions', params: {'p_exam_id': widget.examId});"""
           if old not in s:
               old = """      final rows = await _db.from('questions').select('id,subject_id,topic_id,difficulty,question_hi,question_en,marks,negative_marks,question_options(id,option_key,text_hi,text_en,display_order)')
@@ -242,7 +242,7 @@ jobs:
               setState(() { _questions = list; _loading = false; });
             } catch (e) { if (mounted) setState(() { _error = e.toString(); _loading = false; }); }
           }
-"""
+          """
           s = s[:start] + load + s[end:]
           s = s.replace("widget.topicId);", "widget.topicId ?? '');")
           practice.write_text(s)
@@ -366,8 +366,8 @@ jobs:
           replace_once(library,
               " Future<void> load() async {",
               """ @override void didChangeAppLifecycleState(AppLifecycleState state){if(state==AppLifecycleState.resumed&&mounted)load();}
- @override void dispose(){WidgetsBinding.instance.removeObserver(this);super.dispose();}
- Future<void> load() async {""",
+           @override void dispose(){WidgetsBinding.instance.removeObserver(this);super.dispose();}
+           Future<void> load() async {""",
               "Study library resume refresh")
 
           # This release is free-only: premium-tagged published materials are also accessible.
