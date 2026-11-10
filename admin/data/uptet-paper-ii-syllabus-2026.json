@@ -1,0 +1,561 @@
+{
+  "schema_version": 1,
+  "exam_code": "UPTET2",
+  "exam_name_en": "UPTET Paper II – Upper Primary (Classes VI–VIII)",
+  "exam_name_hi": "UPTET पेपर II – उच्च प्राथमिक स्तर (कक्षा 6–8)",
+  "source": {
+    "authority": "Uttar Pradesh Education Service Selection Commission (UPESSC)",
+    "document": "UPTET 2026 Information Booklet, Advertisement No. 01/UPTET/2026, Appendix 5; Upper Primary syllabus",
+    "official_page": "https://upessc.up.gov.in/Home/Syllabus_all",
+    "official_pdf": "https://www.upessc.up.gov.in/syllabus/6f31864c-e9ce-4e7c-aa44-77924ddc8213.pdf",
+    "verified_date": "2026-11-10"
+  },
+  "pattern": {
+    "questions": 150,
+    "marks": 150,
+    "duration_minutes": 150,
+    "negative_marking": false,
+    "sections": [
+      {
+        "code": "CDP",
+        "name_en": "Child Development and Pedagogy",
+        "name_hi": "बाल विकास एवं शिक्षण विधियाँ",
+        "questions": 30,
+        "compulsory": true
+      },
+      {
+        "code": "HIN",
+        "name_en": "Language I – Hindi",
+        "name_hi": "भाषा I – हिन्दी",
+        "questions": 30,
+        "compulsory": true
+      },
+      {
+        "code": "LANG2",
+        "name_en": "Language II – English / Urdu / Sanskrit",
+        "name_hi": "भाषा II – अंग्रेज़ी / उर्दू / संस्कृत",
+        "questions": 30,
+        "compulsory": true
+      },
+      {
+        "code": "MATHSCI",
+        "name_en": "Mathematics and Science",
+        "name_hi": "गणित एवं विज्ञान",
+        "questions": 60,
+        "compulsory": false,
+        "choice_group": "subject_group"
+      },
+      {
+        "code": "SOCIAL",
+        "name_en": "Social Studies / Social Science",
+        "name_hi": "सामाजिक अध्ययन / सामाजिक विज्ञान",
+        "questions": 60,
+        "compulsory": false,
+        "choice_group": "subject_group"
+      }
+    ]
+  },
+  "note_en": "Paper II candidates select the Mathematics & Science route or the Social Studies route as applicable. Language II is selected from the notified language options. Confirm every topic against the current UPESSC booklet before treating this structured outline as a final exhaustive transcription.",
+  "note_hi": "पेपर II में अभ्यर्थी नियमानुसार गणित-विज्ञान अथवा सामाजिक अध्ययन समूह चुनते हैं। भाषा II के लिए अधिसूचित विकल्प चुनें। इस संरचित रूपरेखा को अंतिम पूर्ण प्रतिलिपि मानने से पहले वर्तमान UPESSC पुस्तिका से प्रत्येक बिंदु का मिलान करें।",
+  "subjects": [
+    {
+      "code": "CDP",
+      "name_en": "Child Development and Pedagogy",
+      "name_hi": "बाल विकास एवं शिक्षण विधियाँ",
+      "chapters": [
+        {
+          "code": "CDP-DEV",
+          "name_en": "Child Development",
+          "name_hi": "बाल विकास",
+          "topics": [
+            [
+              "Concept and principles of development",
+              "विकास की अवधारणा एवं सिद्धांत"
+            ],
+            [
+              "Influence of heredity and environment",
+              "वंशानुक्रम एवं वातावरण का प्रभाव"
+            ],
+            [
+              "Socialisation processes: teacher, parents and peers",
+              "समाजीकरण की प्रक्रिया: शिक्षक, माता-पिता एवं सहपाठी"
+            ],
+            [
+              "Piaget, Kohlberg and Vygotsky: key perspectives",
+              "पियाजे, कोहलबर्ग एवं वाइगोत्स्की के प्रमुख विचार"
+            ],
+            [
+              "Child-centred and progressive education",
+              "बाल-केंद्रित एवं प्रगतिशील शिक्षा"
+            ],
+            [
+              "Intelligence and individual differences",
+              "बुद्धि एवं व्यक्तिगत भिन्नताएँ"
+            ],
+            [
+              "Language and thought",
+              "भाषा एवं चिंतन"
+            ],
+            [
+              "Gender as a social construct and gender roles",
+              "सामाजिक संरचना के रूप में लिंग एवं लैंगिक भूमिकाएँ"
+            ],
+            [
+              "Assessment for learning and assessment of learning",
+              "अधिगम हेतु आकलन एवं अधिगम का आकलन"
+            ]
+          ]
+        },
+        {
+          "code": "CDP-INCL",
+          "name_en": "Inclusive Education and Learning Needs",
+          "name_hi": "समावेशी शिक्षा एवं अधिगम की आवश्यकताएँ",
+          "topics": [
+            [
+              "Addressing learners from diverse backgrounds",
+              "विविध पृष्ठभूमि के शिक्षार्थियों की आवश्यकताओं को समझना"
+            ],
+            [
+              "Addressing children with learning difficulties and impairment",
+              "अधिगम कठिनाइयों एवं दिव्यांगता वाले बच्चों की आवश्यकताएँ"
+            ],
+            [
+              "Talented, creative and specially-abled learners",
+              "प्रतिभाशाली, सृजनशील एवं विशेष आवश्यकता वाले शिक्षार्थी"
+            ]
+          ]
+        },
+        {
+          "code": "CDP-PED",
+          "name_en": "Learning and Pedagogy",
+          "name_hi": "अधिगम एवं शिक्षणशास्त्र",
+          "topics": [
+            [
+              "How children think and learn",
+              "बच्चे कैसे सोचते और सीखते हैं"
+            ],
+            [
+              "Basic processes of teaching and learning",
+              "शिक्षण एवं अधिगम की मूल प्रक्रियाएँ"
+            ],
+            [
+              "Children’s strategies of learning",
+              "बच्चों की अधिगम रणनीतियाँ"
+            ],
+            [
+              "Learning as a social activity",
+              "सामाजिक गतिविधि के रूप में अधिगम"
+            ],
+            [
+              "Child as a problem solver and scientific investigator",
+              "समस्या समाधानकर्ता एवं वैज्ञानिक अन्वेषक के रूप में बच्चा"
+            ],
+            [
+              "Alternative conceptions and misconceptions",
+              "वैकल्पिक अवधारणाएँ एवं भ्रांतियाँ"
+            ],
+            [
+              "Cognition, emotions and motivation",
+              "संज्ञान, संवेग एवं अभिप्रेरणा"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "HIN",
+      "name_en": "Language I – Hindi",
+      "name_hi": "भाषा I – हिन्दी",
+      "chapters": [
+        {
+          "code": "HIN-COMP",
+          "name_en": "Language Comprehension",
+          "name_hi": "भाषा बोध",
+          "topics": [
+            [
+              "Unseen prose passages",
+              "अपठित गद्यांश"
+            ],
+            [
+              "Unseen poetry passages",
+              "अपठित पद्यांश"
+            ],
+            [
+              "Comprehension, inference, grammar and verbal ability",
+              "बोध, निष्कर्ष, व्याकरण एवं मौखिक क्षमता"
+            ]
+          ]
+        },
+        {
+          "code": "HIN-PED",
+          "name_en": "Pedagogy of Language Development",
+          "name_hi": "भाषा विकास का शिक्षणशास्त्र",
+          "topics": [
+            [
+              "Learning and acquisition",
+              "अधिगम एवं अर्जन"
+            ],
+            [
+              "Principles of language teaching",
+              "भाषा शिक्षण के सिद्धांत"
+            ],
+            [
+              "Listening and speaking: role of language",
+              "सुनना एवं बोलना: भाषा की भूमिका"
+            ],
+            [
+              "Grammar in context",
+              "संदर्भ में व्याकरण"
+            ],
+            [
+              "Language skills: listening, speaking, reading and writing",
+              "भाषायी कौशल: सुनना, बोलना, पढ़ना एवं लिखना"
+            ],
+            [
+              "Challenges of teaching language in a diverse classroom",
+              "विविध कक्षा में भाषा शिक्षण की चुनौतियाँ"
+            ],
+            [
+              "Teaching-learning materials and assessment",
+              "शिक्षण-अधिगम सामग्री एवं आकलन"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "ENG",
+      "name_en": "Language II – English",
+      "name_hi": "भाषा II – अंग्रेज़ी",
+      "chapters": [
+        {
+          "code": "ENG-COMP",
+          "name_en": "Language Comprehension",
+          "name_hi": "भाषा बोध",
+          "topics": [
+            [
+              "Unseen prose passages",
+              "अपठित गद्यांश"
+            ],
+            [
+              "Unseen poem / literary passage",
+              "अपठित कविता / साहित्यिक गद्यांश"
+            ],
+            [
+              "Comprehension, grammar and verbal ability",
+              "बोध, व्याकरण एवं मौखिक क्षमता"
+            ]
+          ]
+        },
+        {
+          "code": "ENG-PED",
+          "name_en": "Pedagogy of Language Development",
+          "name_hi": "भाषा विकास का शिक्षणशास्त्र",
+          "topics": [
+            [
+              "Learning and acquisition",
+              "अधिगम एवं अर्जन"
+            ],
+            [
+              "Principles of language teaching",
+              "भाषा शिक्षण के सिद्धांत"
+            ],
+            [
+              "Listening and speaking",
+              "सुनना एवं बोलना"
+            ],
+            [
+              "Role of grammar in communication",
+              "संचार में व्याकरण की भूमिका"
+            ],
+            [
+              "Language skills: LSRW",
+              "भाषायी कौशल: LSRW"
+            ],
+            [
+              "Challenges in teaching English",
+              "अंग्रेज़ी शिक्षण की चुनौतियाँ"
+            ],
+            [
+              "Teaching-learning materials and assessment",
+              "शिक्षण-अधिगम सामग्री एवं आकलन"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "MATH",
+      "name_en": "Mathematics",
+      "name_hi": "गणित",
+      "chapters": [
+        {
+          "code": "MATH-CONT",
+          "name_en": "Mathematics Content",
+          "name_hi": "गणित विषयवस्तु",
+          "topics": [
+            [
+              "Number system",
+              "संख्या पद्धति"
+            ],
+            [
+              "Algebra",
+              "बीजगणित"
+            ],
+            [
+              "Geometry",
+              "ज्यामिति"
+            ],
+            [
+              "Mensuration",
+              "क्षेत्रमिति"
+            ],
+            [
+              "Data handling",
+              "आँकड़ों का प्रबंधन"
+            ]
+          ]
+        },
+        {
+          "code": "MATH-PED",
+          "name_en": "Pedagogical Issues in Mathematics",
+          "name_hi": "गणित के शिक्षण संबंधी मुद्दे",
+          "topics": [
+            [
+              "Nature of mathematics and logical thinking",
+              "गणित की प्रकृति एवं तार्किक चिंतन"
+            ],
+            [
+              "Place of mathematics in curriculum",
+              "पाठ्यक्रम में गणित का स्थान"
+            ],
+            [
+              "Language of mathematics",
+              "गणित की भाषा"
+            ],
+            [
+              "Community mathematics",
+              "सामुदायिक गणित"
+            ],
+            [
+              "Evaluation and remedial teaching",
+              "मूल्यांकन एवं उपचारात्मक शिक्षण"
+            ],
+            [
+              "Problems of teaching mathematics",
+              "गणित शिक्षण की समस्याएँ"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SCI",
+      "name_en": "Science",
+      "name_hi": "विज्ञान",
+      "chapters": [
+        {
+          "code": "SCI-CONT",
+          "name_en": "Science Content",
+          "name_hi": "विज्ञान विषयवस्तु",
+          "topics": [
+            [
+              "Food and materials",
+              "भोजन एवं पदार्थ"
+            ],
+            [
+              "The world of the living",
+              "जीव जगत"
+            ],
+            [
+              "Moving things, people and ideas",
+              "गतिमान वस्तुएँ, व्यक्ति एवं विचार"
+            ],
+            [
+              "How things work",
+              "वस्तुएँ कैसे कार्य करती हैं"
+            ],
+            [
+              "Natural phenomena",
+              "प्राकृतिक घटनाएँ"
+            ],
+            [
+              "Natural resources",
+              "प्राकृतिक संसाधन"
+            ]
+          ]
+        },
+        {
+          "code": "SCI-PED",
+          "name_en": "Pedagogical Issues in Science",
+          "name_hi": "विज्ञान के शिक्षण संबंधी मुद्दे",
+          "topics": [
+            [
+              "Nature and structure of science",
+              "विज्ञान की प्रकृति एवं संरचना"
+            ],
+            [
+              "Aims and objectives of science teaching",
+              "विज्ञान शिक्षण के उद्देश्य"
+            ],
+            [
+              "Understanding and appreciating science",
+              "विज्ञान को समझना एवं सराहना"
+            ],
+            [
+              "Approaches and methods of science teaching",
+              "विज्ञान शिक्षण के उपागम एवं विधियाँ"
+            ],
+            [
+              "Innovation and experiment",
+              "नवाचार एवं प्रयोग"
+            ],
+            [
+              "Evaluation and remedial teaching",
+              "मूल्यांकन एवं उपचारात्मक शिक्षण"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SST",
+      "name_en": "Social Studies / Social Science",
+      "name_hi": "सामाजिक अध्ययन / सामाजिक विज्ञान",
+      "chapters": [
+        {
+          "code": "SST-HIST",
+          "name_en": "History",
+          "name_hi": "इतिहास",
+          "topics": [
+            [
+              "When, where and how",
+              "कब, कहाँ और कैसे"
+            ],
+            [
+              "The earliest societies",
+              "प्रारंभिक समाज"
+            ],
+            [
+              "The first farmers and herders",
+              "प्रथम कृषक एवं पशुपालक"
+            ],
+            [
+              "The first cities",
+              "प्रथम नगर"
+            ],
+            [
+              "Early states and empires",
+              "प्रारंभिक राज्य एवं साम्राज्य"
+            ],
+            [
+              "New ideas and religions",
+              "नए विचार एवं धर्म"
+            ],
+            [
+              "Medieval society and regional cultures",
+              "मध्यकालीन समाज एवं क्षेत्रीय संस्कृतियाँ"
+            ],
+            [
+              "Colonialism and the modern period",
+              "उपनिवेशवाद एवं आधुनिक काल"
+            ],
+            [
+              "National movement and post-independence India",
+              "राष्ट्रीय आंदोलन एवं स्वतंत्रता के बाद का भारत"
+            ]
+          ]
+        },
+        {
+          "code": "SST-GEO",
+          "name_en": "Geography",
+          "name_hi": "भूगोल",
+          "topics": [
+            [
+              "Geography as a social study and science",
+              "सामाजिक अध्ययन एवं विज्ञान के रूप में भूगोल"
+            ],
+            [
+              "Earth in the solar system",
+              "सौरमंडल में पृथ्वी"
+            ],
+            [
+              "Globe and maps",
+              "ग्लोब एवं मानचित्र"
+            ],
+            [
+              "Environment: natural and human environment",
+              "पर्यावरण: प्राकृतिक एवं मानवीय"
+            ],
+            [
+              "Air, water and resources",
+              "वायु, जल एवं संसाधन"
+            ],
+            [
+              "Agriculture, industries and human settlements",
+              "कृषि, उद्योग एवं मानव बस्तियाँ"
+            ]
+          ]
+        },
+        {
+          "code": "SST-CIV",
+          "name_en": "Social and Political Life",
+          "name_hi": "सामाजिक एवं राजनीतिक जीवन",
+          "topics": [
+            [
+              "Diversity and government",
+              "विविधता एवं सरकार"
+            ],
+            [
+              "Local government and democracy",
+              "स्थानीय शासन एवं लोकतंत्र"
+            ],
+            [
+              "State government and constitution",
+              "राज्य सरकार एवं संविधान"
+            ],
+            [
+              "Parliament and judiciary",
+              "संसद एवं न्यायपालिका"
+            ],
+            [
+              "Understanding media and markets",
+              "मीडिया एवं बाजार की समझ"
+            ],
+            [
+              "Gender, equality and social justice",
+              "लिंग, समानता एवं सामाजिक न्याय"
+            ]
+          ]
+        },
+        {
+          "code": "SST-PED",
+          "name_en": "Pedagogical Issues in Social Studies",
+          "name_hi": "सामाजिक अध्ययन के शिक्षण संबंधी मुद्दे",
+          "topics": [
+            [
+              "Concept and nature of social science",
+              "सामाजिक विज्ञान की अवधारणा एवं प्रकृति"
+            ],
+            [
+              "Classroom processes and activities",
+              "कक्षा प्रक्रियाएँ एवं गतिविधियाँ"
+            ],
+            [
+              "Critical thinking and inquiry",
+              "आलोचनात्मक चिंतन एवं जिज्ञासा"
+            ],
+            [
+              "Sources and teaching-learning materials",
+              "स्रोत एवं शिक्षण-अधिगम सामग्री"
+            ],
+            [
+              "Project work and assessment",
+              "परियोजना कार्य एवं आकलन"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}
