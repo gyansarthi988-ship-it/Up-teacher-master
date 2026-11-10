@@ -11,7 +11,7 @@
       "scope": "Primary teacher recruitment selection examination",
       "official_pdf": "https://www.upessc.up.gov.in/syllabus/3c14a64c-793d-4b65-9d67-5cc75d255c84.pdf",
       "source_status": "official_pdf_identified",
-      "content_status": "exam_pattern_draft_added_full_official_section_transcription_pending",
+      "content_status": "official_pdf_identified_full_section_and_pattern_transcription_pending",
       "notes": "Separate from UPTET Paper I and II. Do not publish a guessed section split; transcribe official PDF first.",
       "seed_file": "admin/data/super-tet-syllabus-2026.json"
     },
@@ -23,7 +23,7 @@
       "official_page": "https://upessc.up.gov.in/Home/Syllabus_all",
       "source_status": "official_index_and_2026_subject_list_identified",
       "content_status": "common_GK_outline_added_subject_PDF_transcription_pending",
-      "notes": "2026 pattern draft: 120 MCQs, 30 common GK + 90 concerned subject, 360 marks, 120 minutes, +3/-1. Exact subject PDFs must be transcribed separately.",
+      "notes": "2026 subject-wise syllabus index identified. Do not publish an exam pattern until it is transcribed and verified from the official 2026 notification; exact subject PDFs must be transcribed separately.",
       "seed_file": "admin/data/up-tgt-syllabus-2026.json"
     },
     {
