@@ -34,6 +34,9 @@ export default function AdminHome() {
   const [busy, setBusy] = useState(false);
   const [section, setSection] = useState<Section>("overview");
   const [mobileNav, setMobileNav] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [updatesOpen, setUpdatesOpen] = useState(false);
   const [questionBankVersion, setQuestionBankVersion] = useState(0);
   const [stats, setStats] = useState({ students: "—", questions: "—", materials: "—", exams: "—" });
 
@@ -69,6 +72,15 @@ export default function AdminHome() {
 
   useEffect(() => { void refresh(); }, []);
 
+  useEffect(() => {
+    function handleShortcut(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); document.getElementById("admin-global-search")?.focus(); setSearchOpen(true); }
+      if (event.key === "Escape") { setSearchOpen(false); setUpdatesOpen(false); }
+    }
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
+
   async function signIn(event: FormEvent) {
     event.preventDefault(); setBusy(true); setError("");
     try {
@@ -86,7 +98,8 @@ export default function AdminHome() {
   }
 
   const activeNav = useMemo(() => NAV.find((item) => item.id === section) ?? NAV[0], [section]);
-  function go(id: Section) { setSection(id); setMobileNav(false); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function go(id: Section) { setSection(id); setMobileNav(false); setSearchOpen(false); setGlobalSearch(""); setUpdatesOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  const searchResults = NAV.filter(item => (item.label + " " + item.hint).toLowerCase().includes(globalSearch.trim().toLowerCase()));
 
   if (checking) return <main className="auth-wrap"><section className="auth-card"><div className="brand-mark">UT</div><h1>UP Teacher Master</h1><p className="muted">Verifying secure administrator access…</p></section></main>;
   if (!user) return <main className="auth-wrap"><section className="auth-card">
@@ -105,7 +118,26 @@ export default function AdminHome() {
     </aside>
     {mobileNav&&<button className="nav-scrim" onClick={()=>setMobileNav(false)} aria-label="Close navigation" />}
     <div className="admin-main">
-      <header className="topbar"><button className="menu-toggle" onClick={()=>setMobileNav(true)} aria-label="Open menu">☰</button><div className="breadcrumb">Workspace <span>/</span> <b>{activeNav.label}</b></div><div className="topbar-right"><span className="live-dot" /> <span className="topbar-status">Connected</span><div className="top-avatar">{(user[0]??"A").toUpperCase()}</div></div></header>
+      <header className="topbar">
+ <button className="menu-toggle" onClick={()=>setMobileNav(true)} aria-label="Open menu">☰</button>
+ <div className="breadcrumb">Workspace <span>/</span> <b>{activeNav.label}</b></div>
+ <div className="topbar-tools">
+  <div className="global-search-wrap"><span className="search-glyph">⌕</span>
+   <input id="admin-global-search" value={globalSearch} onChange={event=>{setGlobalSearch(event.target.value);setSearchOpen(true);}} onFocus={()=>setSearchOpen(true)} placeholder="Search modules..." aria-label="Search admin modules"/>
+   <kbd>Ctrl K</kbd>
+   {searchOpen&&globalSearch.trim()&&<div className="search-results">{searchResults.length?searchResults.map(item=><button key={item.id} onClick={()=>go(item.id)}><span>{item.icon}</span><span><b>{item.label}</b><small>{item.hint}</small></span><i>↗</i></button>):<p>No matching modules found.</p>}</div>}
+  </div>
+  <div className="updates-wrap"><button className={updatesOpen?"icon-action icon-action-active":"icon-action"} onClick={()=>{setUpdatesOpen(v=>!v);setSearchOpen(false);}} aria-label="Open workspace updates" title="Workspace updates"><span>♧</span><i/></button>
+   {updatesOpen&&<div className="updates-popover"><div className="updates-head"><b>Workspace status</b><span>Live</span></div>
+    <div className="update-row"><span className="update-check">✓</span><div><b>Admin session active</b><small>Authorised workspace access</small></div></div>
+    <div className="update-row"><span className="update-check">✓</span><div><b>Course catalogue loaded</b><small>{exams.length} examination courses available</small></div></div>
+    <div className="update-row"><span className="update-neutral">i</span><div><b>Content review workflow</b><small>Drafts require approval before publishing</small></div></div>
+    <button className="updates-refresh" onClick={()=>{setUpdatesOpen(false);void refresh();}}>Refresh workspace data</button>
+   </div>}
+  </div>
+  <span className="live-dot" /> <span className="topbar-status">Connected</span><div className="top-avatar">{(user[0]??"A").toUpperCase()}</div>
+ </div>
+</header>
       <main className="page-content">
         {error&&<div className="notice-error" role="alert">{error}</div>}
         {section==="overview"&&<><div className="page-heading"><div><p className="eyebrow">ADMIN WORKSPACE</p><h1>Good to see you.</h1><p className="muted">Here’s what’s happening across UP Teacher Master today.</p></div><span className="date-chip">● Live workspace</span></div>
