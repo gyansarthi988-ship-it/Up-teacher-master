@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "exam_code": "UP_TGT_2026",
+  "exam_name_en": "UP TGT – Trained Graduate Teacher",
+  "exam_name_hi": "उत्तर प्रदेश प्रशिक्षित स्नातक शिक्षक (TGT)",
+  "source": {
+    "authority": "UPESSC",
+    "official_page": "https://upessc.up.gov.in/Home/Syllabus_all",
+    "advertisement": "Advertisement No. 07/2026",
+    "official_syllabus_index": "https://upessc.up.gov.in/Home/Syllabus_all",
+    "verified_date": "2026-11-10"
+  },
+  "pattern": {
+    "questions": 120,
+    "marks": 360,
+    "duration_minutes": 120,
+    "correct_marks": 3,
+    "wrong_marks": -1,
+    "sections": [
+      {
+        "name_en": "General Knowledge",
+        "name_hi": "सामान्य ज्ञान",
+        "questions": 30,
+        "marks": 90
+      },
+      {
+        "name_en": "Concerned Subject",
+        "name_hi": "संबंधित विषय",
+        "questions": 90,
+        "marks": 270
+      }
+    ]
+  },
+  "subjects": [
+    "Hindi",
+    "English",
+    "Sanskrit",
+    "Urdu",
+    "Mathematics",
+    "Science",
+    "Social Science",
+    "Home Science",
+    "Agriculture",
+    "Physical Education",
+    "Art",
+    "Music (Vocal)",
+    "Music (Instrumental)",
+    "Commerce"
+  ],
+  "general_knowledge": [
+    {
+      "unit": "Current Affairs",
+      "unit_hi": "समसामयिक घटनाएँ",
+      "topics": [
+        "State, national and international events of importance",
+        "Personalities in news",
+        "Sports"
+      ]
+    },
+    {
+      "unit": "History, Polity, Economy and Geography",
+      "unit_hi": "इतिहास, राजव्यवस्था, अर्थव्यवस्था एवं भूगोल",
+      "topics": [
+        "Indian history and national movement",
+        "Indian Constitution and polity, including legal and constitutional developments related to education",
+        "Indian economy",
+        "Basic geography and population of India"
+      ]
+    },
+    {
+      "unit": "General Science and ICT",
+      "unit_hi": "सामान्य विज्ञान एवं ICT",
+      "topics": [
+        "General science, technology and environment in contemporary context",
+        "Human health and hygiene: vitamins, minerals, diseases, deficiency diseases, hormones and enzymes",
+        "Computer and internet terminology",
+        "Applications of ICT",
+        "Developments in educational technology"
+      ]
+    }
+  ],
+  "subject_syllabus_status": "official_subject_pdfs_exist_but_full_topic_transcription_not_yet_completed",
+  "admin_note": "Select the candidate's exact TGT subject. This file contains the common GK outline only; do not present it as the complete subject-wise syllabus. Transcribe the selected subject from its 2026 UPESSC PDF before publishing."
+}
