@@ -13,7 +13,7 @@ type Subject = { id:string; code:string; name_en:string; name_hi:string };
 type Chapter = { id:string; subject_id:string; name_en:string; name_hi:string };
 type Topic = { id:string; chapter_id:string; name_en:string; name_hi:string };
 type Question = { id:string; question_en:string|null; question_hi:string|null; status:string; difficulty:string; created_at:string };
-type Material = { id:string; title_en:string|null; title_hi:string|null; status:string; access_tier:string; storage_path:string|null; created_at:string };
+type Material = { id:string; title_en:string|null; title_hi:string|null; status:string; access_tier:string; storage_path:string|null; exam_id?:string|null; subject_id?:string|null; created_at:string };
 type Tab = "syllabus"|"questions"|"import"|"materials";
 
 const field = "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900";
@@ -40,6 +40,8 @@ export default function ContentStudio() {
   const [materialTier,setMaterialTier] = useState("all");
   const [materialSort,setMaterialSort] = useState("newest");
   const [materialPage,setMaterialPage] = useState(1);
+  const [editingMaterial,setEditingMaterial] = useState<Material|null>(null);
+  const [previewBusy,setPreviewBusy] = useState<string|null>(null);
   const pageSize = 10;
 
   async function loadAll() {
@@ -50,7 +52,7 @@ export default function ContentStudio() {
       supabase.from("chapters").select("id,subject_id,name_en,name_hi").order("display_order"),
       supabase.from("topics").select("id,chapter_id,name_en,name_hi").order("display_order"),
       supabase.from("questions").select("id,question_en,question_hi,status,difficulty,created_at").order("created_at",{ascending:false}).limit(100),
-      supabase.from("study_materials").select("id,title_en,title_hi,status,access_tier,storage_path,created_at").order("created_at",{ascending:false}).limit(100)
+      supabase.from("study_materials").select("id,title_en,title_hi,status,access_tier,storage_path,exam_id,subject_id,created_at").order("created_at",{ascending:false}).limit(100)
     ]);
     for (const r of [e,s,c,t,q,m]) if (r.error) { setError(r.error.message); return; }
     setExams(e.data ?? []); setSubjects(s.data ?? []); setChapters(c.data ?? []);
@@ -270,6 +272,35 @@ export default function ContentStudio() {
       }).eq("id",m.id);
       if(error) throw error;
     },"Study material published.");
+  }
+
+
+  async function saveMaterialMetadata(e:FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if(!editingMaterial)return;
+    const form=new FormData(e.currentTarget);
+    await run(async()=>{
+      const {error}=await supabase.from("study_materials").update({
+        title_en:String(form.get("title_en")||"").trim()||null,
+        title_hi:String(form.get("title_hi")||"").trim()||null,
+        exam_id:String(form.get("exam_id")||"")||null,
+        subject_id:String(form.get("subject_id")||"")||null,
+        access_tier:String(form.get("access_tier")||"free")
+      }).eq("id",editingMaterial.id);
+      if(error)throw error;
+      setEditingMaterial(null);
+    },"Study material details updated.");
+  }
+
+  async function previewMaterial(m:Material) {
+    if(!m.storage_path)return;
+    setPreviewBusy(m.id);setError("");
+    try{
+      const {data,error}=await supabase.storage.from("study-materials").createSignedUrl(m.storage_path,300);
+      if(error||!data?.signedUrl)throw error??new Error("Secure preview link could not be created.");
+      window.open(data.signedUrl,"_blank","noopener,noreferrer");
+    }catch(e){setError(e instanceof Error?e.message:"Unable to preview this PDF.");}
+    finally{setPreviewBusy(null);}
   }
 
   const tabs:[Tab,string][]=[["syllabus","Syllabus"],["questions","Question Bank"],["import","Excel Import"],["materials","PDF Materials"]];
