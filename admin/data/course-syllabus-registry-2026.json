@@ -27,13 +27,15 @@
     {
       "course_code": "UP_PRT",
       "display_name": "UP PRT",
-      "syllabus_title": "Primary-level syllabus requires course identity confirmation",
+      "syllabus_title": "UPTET Paper I – Primary (Classes I–V) candidate mapping",
       "scope": "Potentially UPTET Paper I (Classes I–V) or Assistant Teacher recruitment syllabus",
       "official_uptet_paper_i_pdf": "https://www.upessc.up.gov.in/syllabus/ede204de-908b-435f-9028-5fe87a4d460c.pdf",
       "official_recruitment_pdf": "https://www.upessc.up.gov.in/syllabus/837218cf-1d9a-4252-a08c-404719d1b9d9.pdf",
-      "source_status": "official_pdf_candidates_identified",
-      "content_status": "identity_confirmation_and_full_transcription_required",
-      "notes": "Keep UPTET Paper I eligibility test separate from the Assistant Teacher recruitment selection syllabus."
+      "source_status": "official_2026_booklet_and_pdf_verified",
+      "content_status": "bilingual_topic_outline_prepared_pending_course_identity_confirmation_and_admin_review",
+      "notes": "Prepared as the likely meaning of PRT. Keep unpublished until the course owner confirms PRT means UPTET Paper I rather than a separate primary recruitment selection exam.",
+      "seed_file": "admin/data/uptet-paper-i-syllabus-2026.json",
+      "official_pdf": "https://www.upessc.up.gov.in/syllabus/ede204de-908b-435f-9028-5fe87a4d460c.pdf"
     },
     {
       "course_code": "UP_JUNIOR",
