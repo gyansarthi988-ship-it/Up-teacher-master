@@ -44,8 +44,10 @@ export default function QuestionBulkImportCenter({exams,onImported}:{exams:Exam[
    const normal=data.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k.trim(),v])));
    setRaw(normal);
    const map:Record<string,string>={};
+   const normalizeHeader=(value:string)=>value.toLowerCase().replace(/[^a-z0-9]/g,"");
    for(const [target,opts] of Object.entries(aliases)){
-    const found=Object.keys(normal[0]).find(c=>opts.includes(c.toLowerCase().replace(/[^a-z0-9]/g,"")));
+    const accepted=new Set([target,...opts].map(normalizeHeader));
+    const found=Object.keys(normal[0]).find(column=>accepted.has(normalizeHeader(column)));
     if(found)map[target]=found;
    }
    setMapping(map);setStage("mapped");
