@@ -31,6 +31,16 @@ export default function ContentStudio() {
   const [busy,setBusy] = useState(false);
   const [message,setMessage] = useState("");
   const [error,setError] = useState("");
+  const [questionSearch,setQuestionSearch] = useState("");
+  const [questionStatus,setQuestionStatus] = useState("all");
+  const [questionSort,setQuestionSort] = useState("newest");
+  const [questionPage,setQuestionPage] = useState(1);
+  const [materialSearch,setMaterialSearch] = useState("");
+  const [materialStatus,setMaterialStatus] = useState("all");
+  const [materialTier,setMaterialTier] = useState("all");
+  const [materialSort,setMaterialSort] = useState("newest");
+  const [materialPage,setMaterialPage] = useState(1);
+  const pageSize = 10;
 
   async function loadAll() {
     setError("");
@@ -47,6 +57,30 @@ export default function ContentStudio() {
     setTopics(t.data ?? []); setQuestions(q.data ?? []); setMaterials(m.data ?? []);
   }
   useEffect(()=>{ void loadAll(); },[]);
+
+  const visibleQuestions = useMemo(()=>{
+    const term=questionSearch.trim().toLowerCase();
+    const filtered=questions.filter(q=>{
+      const matchesStatus=questionStatus==="all"||q.status===questionStatus;
+      const matchesText=!term||`${q.question_en??""} ${q.question_hi??""} ${q.id}`.toLowerCase().includes(term);
+      return matchesStatus&&matchesText;
+    });
+    return filtered.sort((a,b)=>questionSort==="oldest"?a.created_at.localeCompare(b.created_at):questionSort==="az"?(a.question_en||a.question_hi||"").localeCompare(b.question_en||b.question_hi||""):b.created_at.localeCompare(a.created_at));
+  },[questions,questionSearch,questionStatus,questionSort]);
+  const questionPages=Math.max(1,Math.ceil(visibleQuestions.length/pageSize));
+  const pagedQuestions=visibleQuestions.slice((questionPage-1)*pageSize,questionPage*pageSize);
+  const visibleMaterials=useMemo(()=>{
+    const term=materialSearch.trim().toLowerCase();
+    const filtered=materials.filter(m=>{
+      const matchesStatus=materialStatus==="all"||m.status===materialStatus;
+      const matchesTier=materialTier==="all"||m.access_tier===materialTier;
+      const matchesText=!term||`${m.title_en??""} ${m.title_hi??""} ${m.id}`.toLowerCase().includes(term);
+      return matchesStatus&&matchesTier&&matchesText;
+    });
+    return filtered.sort((a,b)=>materialSort==="oldest"?a.created_at.localeCompare(b.created_at):materialSort==="az"?(a.title_en||a.title_hi||"").localeCompare(b.title_en||b.title_hi||""):b.created_at.localeCompare(a.created_at));
+  },[materials,materialSearch,materialStatus,materialTier,materialSort]);
+  const materialPages=Math.max(1,Math.ceil(visibleMaterials.length/pageSize));
+  const pagedMaterials=visibleMaterials.slice((materialPage-1)*pageSize,materialPage*pageSize);
 
   async function run(action:()=>Promise<void>, success:string) {
     setBusy(true); setError(""); setMessage("");
@@ -386,13 +420,20 @@ export default function ContentStudio() {
         </div>
         <button className={btn} disabled={busy}>Save Question as Draft</button>
       </form>
-      <div className="card">
-        <h2 className="mb-3 text-lg font-bold">Latest questions ({questions.length})</h2>
-        <div className="space-y-2">{questions.map(q=><div key={q.id} className="flex flex-wrap items-center justify-between gap-3 border-b py-3">
-          <div className="min-w-0 flex-1"><p className="font-medium">{q.question_en || q.question_hi}</p><p className="text-xs text-slate-500">{q.difficulty} · {q.status} · {q.id.slice(0,8)}</p></div>
+      <div className="card space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-lg font-bold">Question Bank</h2><p className="text-xs text-slate-500">Showing latest 100 records loaded from the database · {visibleQuestions.length} match(es)</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{questions.filter(q=>q.status==="published").length} published</span></div>
+        <div className="grid gap-2 md:grid-cols-3">
+          <input className={field} value={questionSearch} onChange={e=>{setQuestionSearch(e.target.value);setQuestionPage(1);}} placeholder="Search question text or ID"/>
+          <select className={field} value={questionStatus} onChange={e=>{setQuestionStatus(e.target.value);setQuestionPage(1);}}><option value="all">All statuses</option><option value="draft">Draft</option><option value="under_review">Under review</option><option value="approved">Approved</option><option value="published">Published</option></select>
+          <select className={field} value={questionSort} onChange={e=>setQuestionSort(e.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="az">Question A–Z</option></select>
+        </div>
+        <div className="space-y-2">{pagedQuestions.map(q=><div key={q.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 py-3">
+          <div className="min-w-0 flex-1"><p className="font-medium">{q.question_en || q.question_hi || "Untitled question"}</p>{q.question_en&&q.question_hi&&<p className="mt-1 text-xs text-slate-500">{q.question_hi}</p>}<p className="text-xs text-slate-500">{q.difficulty} · {q.status} · {new Date(q.created_at).toLocaleDateString()} · {q.id.slice(0,8)}</p></div>
           {q.status!=="published" && <button className={btn} disabled={busy} onClick={()=>void publishQuestion(q)}>Approve & Publish</button>}
           {q.status==="published" && <span className="rounded-full bg-green-100 px-3 py-1 text-xs text-green-800">Published</span>}
         </div>)}</div>
+        {visibleQuestions.length===0&&<p className="py-6 text-center text-sm text-slate-500">No questions match these filters.</p>}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3"><span className="text-xs text-slate-500">Page {questionPage} of {questionPages}</span><div className="flex gap-2"><button className={secondary} disabled={questionPage<=1} onClick={()=>setQuestionPage(p=>Math.max(1,p-1))}>Previous</button><button className={secondary} disabled={questionPage>=questionPages} onClick={()=>setQuestionPage(p=>Math.min(questionPages,p+1))}>Next</button></div></div>
       </div>
     </div>}
     {tab==="import" && <BulkImporter exams={exams} subjects={subjects} topics={topics} onDone={loadAll} setMessage={setMessage} setError={setError}/>}
@@ -410,13 +451,21 @@ export default function ContentStudio() {
         <p className="text-xs text-slate-500">PDF only · Maximum 50 MB · Uploaded as Draft. Student download/signed-link entitlement flow is implemented in a later phase.</p>
         <button className={btn} disabled={busy}>Upload PDF</button>
       </form>
-      <div className="card">
-        <h2 className="mb-3 text-lg font-bold">Study materials ({materials.length})</h2>
-        {materials.map(m=><div key={m.id} className="flex flex-wrap items-center justify-between gap-3 border-b py-3">
-          <div><p className="font-medium">{m.title_en || m.title_hi || "Untitled PDF"}</p><p className="text-xs text-slate-500">{m.access_tier} · {m.status}</p></div>
+      <div className="card space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-lg font-bold">Study Material Library</h2><p className="text-xs text-slate-500">Latest 100 records loaded · {visibleMaterials.length} match(es)</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{materials.filter(m=>m.status==="published").length} published</span></div>
+        <div className="grid gap-2 md:grid-cols-4">
+          <input className={field} value={materialSearch} onChange={e=>{setMaterialSearch(e.target.value);setMaterialPage(1);}} placeholder="Search title or ID"/>
+          <select className={field} value={materialStatus} onChange={e=>{setMaterialStatus(e.target.value);setMaterialPage(1);}}><option value="all">All statuses</option><option value="draft">Draft</option><option value="under_review">Under review</option><option value="approved">Approved</option><option value="published">Published</option></select>
+          <select className={field} value={materialTier} onChange={e=>{setMaterialTier(e.target.value);setMaterialPage(1);}}><option value="all">All access levels</option><option value="free">Free</option><option value="premium">Premium</option></select>
+          <select className={field} value={materialSort} onChange={e=>setMaterialSort(e.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="az">Title A–Z</option></select>
+        </div>
+        {pagedMaterials.map(m=><div key={m.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 py-3">
+          <div className="min-w-0 flex-1"><p className="font-medium">{m.title_en || m.title_hi || "Untitled PDF"}</p>{m.title_en&&m.title_hi&&<p className="text-xs text-slate-500">{m.title_hi}</p>}<p className="text-xs text-slate-500">{m.access_tier} · {m.status} · {new Date(m.created_at).toLocaleDateString()} · {m.id.slice(0,8)}</p></div>
           {m.status!=="published" && <button className={btn} disabled={busy} onClick={()=>void publishMaterial(m)}>Publish</button>}
           {m.status==="published" && <span className="text-xs text-green-700">Published</span>}
         </div>)}
+        {visibleMaterials.length===0&&<p className="py-6 text-center text-sm text-slate-500">No materials match these filters.</p>}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3"><span className="text-xs text-slate-500">Page {materialPage} of {materialPages}</span><div className="flex gap-2"><button className={secondary} disabled={materialPage<=1} onClick={()=>setMaterialPage(p=>Math.max(1,p-1))}>Previous</button><button className={secondary} disabled={materialPage>=materialPages} onClick={()=>setMaterialPage(p=>Math.min(materialPages,p+1))}>Next</button></div></div>
       </div>
     </div>}
   </section>;
