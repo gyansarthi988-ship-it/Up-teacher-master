@@ -490,11 +490,36 @@ export default function ContentStudio() {
           <select className={field} value={materialTier} onChange={e=>{setMaterialTier(e.target.value);setMaterialPage(1);}}><option value="all">All access levels</option><option value="free">Free</option><option value="premium">Premium</option></select>
           <select className={field} value={materialSort} onChange={e=>setMaterialSort(e.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="az">Title A–Z</option></select>
         </div>
-        {pagedMaterials.map(m=><div key={m.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 py-3">
-          <div className="min-w-0 flex-1"><p className="font-medium">{m.title_en || m.title_hi || "Untitled PDF"}</p>{m.title_en&&m.title_hi&&<p className="text-xs text-slate-500">{m.title_hi}</p>}<p className="text-xs text-slate-500">{m.access_tier} · {m.status} · {new Date(m.created_at).toLocaleDateString()} · {m.id.slice(0,8)}</p></div>
-          {m.status!=="published" && <button className={btn} disabled={busy} onClick={()=>void publishMaterial(m)}>Publish</button>}
-          {m.status==="published" && <span className="text-xs text-green-700">Published</span>}
-        </div>)}
+        <div className="material-library-grid">
+        {pagedMaterials.map(m=><article key={m.id} className="material-card">
+          <div className="material-cover">
+            <svg viewBox="0 0 72 82" aria-hidden="true" className="material-pdf-art"><path d="M13 3h30l17 17v55a4 4 0 0 1-4 4H13a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Z" fill="white"/><path d="M43 3v15a3 3 0 0 0 3 3h14" fill="#dce7ff"/><path d="M20 39h32M20 48h32M20 57h23" stroke="#9aabd0" strokeWidth="3" strokeLinecap="round"/><rect x="19" y="14" width="18" height="12" rx="3" fill="#e84d5a"/><text x="28" y="22.5" fontSize="7" textAnchor="middle" fill="white" fontWeight="800">PDF</text></svg>
+            <span>STUDY RESOURCE</span>
+          </div>
+          <div className="material-card-body">
+            <div className="flex flex-wrap items-center gap-2"><span className={"material-status "+(m.status==="published"?"is-published":"is-draft")}>{m.status==="published"?"Published":m.status.replace("_"," ")}</span><span className="material-tier">{m.access_tier==="free"?"Free access":"Premium"}</span></div>
+            <h3>{m.title_en || m.title_hi || "Untitled PDF"}</h3>
+            {m.title_en&&m.title_hi&&<p className="material-title-hi">{m.title_hi}</p>}
+            <p className="material-meta"><span>▤ {m.exam_id?exams.find(x=>x.id===m.exam_id)?.name_en||"Mapped exam":"All courses"}</span><span>◷ {new Date(m.created_at).toLocaleDateString()}</span></p>
+            <p className="material-id">ID · {m.id.slice(0,8)}</p>
+            <div className="material-actions">
+              <button type="button" className="material-action-primary" disabled={!m.storage_path||previewBusy===m.id} onClick={()=>void previewMaterial(m)}>{previewBusy===m.id?"Opening…":"↗ Preview PDF"}</button>
+              <button type="button" className="material-action-secondary" onClick={()=>setEditingMaterial(m)}>✎ Edit details</button>
+              {m.status!=="published"&&<button type="button" className="material-action-publish" disabled={busy} onClick={()=>void publishMaterial(m)}>Publish</button>}
+            </div>
+          </div>
+        </article>)}
+        </div>
+        {editingMaterial&&<div className="material-edit-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setEditingMaterial(null);}}>
+          <form className="material-edit-panel" onSubmit={saveMaterialMetadata}>
+            <div className="flex items-start justify-between gap-3"><div><p className="material-edit-kicker">LIBRARY MANAGEMENT</p><h3>Edit study material</h3><p className="text-xs text-slate-500">Update catalogue details without changing the uploaded PDF.</p></div><button type="button" className="material-close" onClick={()=>setEditingMaterial(null)}>×</button></div>
+            <label>Title (English)<input name="title_en" defaultValue={editingMaterial.title_en||""} placeholder="Enter English title"/></label>
+            <label>शीर्षक (हिन्दी)<input name="title_hi" defaultValue={editingMaterial.title_hi||""} placeholder="हिन्दी शीर्षक"/></label>
+            <div className="grid gap-3 sm:grid-cols-2"><label>Course / Examination<select name="exam_id" defaultValue={editingMaterial.exam_id||""}><option value="">All courses</option>{exams.map(x=><option key={x.id} value={x.id}>{x.name_en}</option>)}</select></label><label>Subject<select name="subject_id" defaultValue={editingMaterial.subject_id||""}><option value="">No subject</option>{subjects.map(x=><option key={x.id} value={x.id}>{x.name_en}</option>)}</select></label></div>
+            <label>Access level<select name="access_tier" defaultValue={editingMaterial.access_tier==="premium"?"premium":"free"}><option value="free">Free</option><option value="premium">Premium</option></select></label>
+            <div className="material-edit-actions"><button type="button" className="material-action-secondary" onClick={()=>setEditingMaterial(null)}>Cancel</button><button type="submit" className="material-action-primary" disabled={busy}>{busy?"Saving…":"Save changes"}</button></div>
+          </form>
+        </div>}
         {visibleMaterials.length===0&&<p className="py-6 text-center text-sm text-slate-500">No materials match these filters.</p>}
         <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3"><span className="text-xs text-slate-500">Page {materialPage} of {materialPages}</span><div className="flex gap-2"><button className={secondary} disabled={materialPage<=1} onClick={()=>setMaterialPage(p=>Math.max(1,p-1))}>Previous</button><button className={secondary} disabled={materialPage>=materialPages} onClick={()=>setMaterialPage(p=>Math.min(materialPages,p+1))}>Next</button></div></div>
       </div>
