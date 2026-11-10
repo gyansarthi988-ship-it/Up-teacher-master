@@ -199,8 +199,7 @@ jobs:
           s = mock.read_text()
           old = """      final rows = await _db.from('questions').select('id,subject_id,topic_id,difficulty,question_hi,question_en,marks,negative_marks,question_options(id,option_key,text_hi,text_en,display_order)')
         .eq('exam_id', widget.examId).eq('status', 'published').limit(2000);"""
-          new = """      final rows = await _db.rpc('get_published_exam_questions', params: {'p_exam_id': widget.examId});
-                final pool = (rows as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();"""
+          new = """      final rows = await _db.rpc('get_published_exam_questions', params: {'p_exam_id': widget.examId});"""
           if old not in s:
               old = """      final rows = await _db.from('questions').select('id,subject_id,topic_id,difficulty,question_hi,question_en,marks,negative_marks,question_options(id,option_key,text_hi,text_en,display_order)')
                 .eq('exam_id', widget.examId).eq('status', 'published').limit(2000);"""
