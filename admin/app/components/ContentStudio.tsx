@@ -5,6 +5,8 @@ import * as XLSX from "xlsx";
 import { supabase } from "../../lib/supabase";
 import uptetPaperII from "../../data/uptet-paper-ii-syllabus-2026.json";
 import uptetPaperI from "../../data/uptet-paper-i-syllabus-2026.json";
+import upTgt2026 from "../../data/up-tgt-syllabus-2026.json";
+import superTet2026 from "../../data/super-tet-syllabus-2026.json";
 
 type Exam = { id:string; code:string; name_en:string; name_hi:string };
 type Subject = { id:string; code:string; name_en:string; name_hi:string };
@@ -245,6 +247,27 @@ export default function ContentStudio() {
     {message && <p className="mb-3 rounded-lg bg-green-50 p-3 text-sm text-green-800">{message}</p>}
     {error && <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     {tab==="syllabus" && <div className="space-y-4">
+      <div className="grid gap-4 xl:grid-cols-2">
+        <article className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+          <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">UP TGT · 2026 revised syllabus</p>
+          <h2 className="mt-1 text-lg font-bold text-slate-900">{upTgt2026.exam_name_en}</h2>
+          <p className="text-sm text-slate-700">{upTgt2026.exam_name_hi}</p>
+          <p className="mt-2 text-sm text-slate-700">120 MCQs · 360 marks · 120 minutes · +3 / −1</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {upTgt2026.general_knowledge.map((unit:any)=><div key={unit.unit} className="rounded-lg bg-white p-3"><b className="block text-sm">{unit.unit}</b><span className="text-xs text-slate-600">{unit.unit_hi}</span><span className="mt-1 block text-xs text-indigo-700">{unit.topics.length} topic groups</span></div>)}
+          </div>
+          <p className="mt-3 text-xs text-amber-800">Common GK outline added. Select and transcribe the exact subject PDF before publishing.</p>
+          <a className="mt-2 inline-block text-xs font-semibold text-indigo-800 underline" href={upTgt2026.source.official_page} target="_blank" rel="noreferrer">Open official UPESSC syllabus index</a>
+        </article>
+        <article className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-xs font-bold uppercase tracking-wide text-amber-800">Super TET · Assistant Teacher Recruitment</p>
+          <h2 className="mt-1 text-lg font-bold text-slate-900">{superTet2026.exam_name_en}</h2>
+          <p className="text-sm text-slate-700">{superTet2026.exam_name_hi}</p>
+          <p className="mt-2 text-sm text-slate-700">120 MCQs · 360 marks · 120 minutes · +3 / −1</p>
+          <p className="mt-3 text-xs text-amber-900">Official PDF identified. Section-wise topics and weightage are not yet transcribed; no guessed syllabus will be imported.</p>
+          <a className="mt-2 inline-block text-xs font-semibold text-amber-900 underline" href={superTet2026.source.official_pdf} target="_blank" rel="noreferrer">Open official Super TET PDF</a>
+        </article>
+      </div>
       <div className="grid gap-4 xl:grid-cols-2">
         {[uptetPaperI,uptetPaperII].map((paper:any)=><article key={paper.exam_code} className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
           <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">{paper.exam_code} · official syllabus draft</p>
