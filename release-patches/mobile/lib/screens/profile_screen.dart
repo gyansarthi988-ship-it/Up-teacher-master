@@ -15,7 +15,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final phone = TextEditingController();
   bool loading = true, saving = false;
   Map<String, dynamic> profile = {};
-  Map<String, dynamic> membership = {};
   bool get hi => widget.language == 'hi';
   String t(String en, String hindi) => hi ? hindi : en;
 
@@ -26,15 +25,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final user = db.auth.currentUser;
       if (user == null) return;
-      final profileFuture = db.from('profiles').select().eq('id', user.id).maybeSingle();
-      final membershipFuture = db.rpc('get_my_membership');
-      final results = await Future.wait<dynamic>(<Future<dynamic>>[
-        profileFuture,
-        membershipFuture,
-      ]);
+      final result = await db.from('profiles').select().eq('id', user.id).maybeSingle();
       if (!mounted) return;
-      profile = Map<String, dynamic>.from((results[0] as Map?) ?? {});
-      membership = Map<String, dynamic>.from((results[1] as Map?) ?? {});
+      profile = Map<String, dynamic>.from(result ?? {});
       name.text = '${profile['full_name'] ?? user.userMetadata?['full_name'] ?? ''}';
       phone.text = '${profile['phone'] ?? user.phone ?? ''}';
       setState(() => loading = false);
@@ -62,9 +55,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override Widget build(BuildContext context) {
     final user = db.auth.currentUser;
-    final active = membership['is_premium'] == true;
-    final sub = membership['subscription'] is Map ? Map<String,dynamic>.from(membership['subscription']) : <String,dynamic>{};
-    final expiry = DateTime.tryParse('${sub['expires_at'] ?? ''}')?.toLocal();
     return Scaffold(
       appBar: AppBar(title: Text(t('My Profile','मेरी प्रोफाइल'))),
       body: loading ? const Center(child: CircularProgressIndicator()) : ListView(padding: const EdgeInsets.all(16), children: [
@@ -84,10 +74,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ]))),
         const SizedBox(height: 12),
         Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [Icon(active ? Icons.workspace_premium : Icons.person_outline, color: active ? Colors.amber.shade800 : null), const SizedBox(width: 8), Expanded(child: Text(t('Membership Status','सदस्यता स्थिति'), style: Theme.of(context).textTheme.titleLarge))]),
-          const SizedBox(height: 8), Text(active ? t('Premium Active','प्रीमियम सक्रिय') : t('Free Membership','फ्री सदस्यता'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-          if (active && expiry != null) Text('${t('Valid until','वैधता समाप्ति')}: ${expiry.toString().split('.').first}'),
-          const SizedBox(height: 10), OutlinedButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PremiumMembershipScreen(language: widget.language))), icon: const Icon(Icons.workspace_premium), label: Text(t('Manage Membership & Purchase History','सदस्यता और खरीदारी का इतिहास देखें'))),
+          Row(children: [const Icon(Icons.verified, color: Colors.green), const SizedBox(width: 8), Expanded(child: Text(t('Free Access','मुफ्त एक्सेस'), style: Theme.of(context).textTheme.titleLarge))]),
+          const SizedBox(height: 8),
+          Text(t('All courses, available practice tests and mock tests are free for every student.','सभी विद्यार्थियों के लिए उपलब्ध कोर्स, प्रैक्टिस टेस्ट और मॉक टेस्ट मुफ्त हैं।')),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PremiumMembershipScreen(language: widget.language))), icon: const Icon(Icons.info_outline), label: Text(t('Access information','एक्सेस की जानकारी'))),
         ]))),
         const SizedBox(height: 12),
         Card(child: Column(children: [
