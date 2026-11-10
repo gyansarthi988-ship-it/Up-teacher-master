@@ -9,16 +9,8 @@
     "official_pdf": "https://www.upessc.up.gov.in/syllabus/3c14a64c-793d-4b65-9d67-5cc75d255c84.pdf",
     "verified_date": "2026-11-10"
   },
-  "pattern": {
-    "questions": 120,
-    "marks": 360,
-    "duration_minutes": 120,
-    "correct_marks": 3,
-    "wrong_marks": -1,
-    "language": "Hindi and English",
-    "answer_mode": "OMR"
-  },
-  "syllabus_status": "official_document_identified_full_topic_transcription_pending",
+  "pattern": null,
+  "syllabus_status": "official_document_identified_full_topic_and_pattern_transcription_pending",
   "sections": [],
-  "admin_note": "This is the Assistant Teacher Recruitment Examination, not UPTET Paper I or Paper II. The section-wise topic/weightage breakdown must be transcribed directly from the official UPESSC PDF before importing or publishing. Do not reuse the UPTET syllabus here."
+  "admin_note": "The earlier draft pattern was not sufficiently verified from the official PDF and has been removed. Do not display question count, marks, duration or marking scheme until transcribed from the official document."
 }
