@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "updated_on": "2026-11-10",
+  "authority": "Uttar Pradesh Education Service Selection Commission (UPESSC)",
+  "official_syllabus_index": "https://upessc.up.gov.in/Home/Syllabus_all",
+  "courses": [
+    {
+      "course_code": "SUPER_TET",
+      "display_name": "UP Super TET",
+      "syllabus_title": "Assistant Teacher Recruitment Examination",
+      "scope": "Primary teacher recruitment selection examination",
+      "official_pdf": "https://www.upessc.up.gov.in/syllabus/3c14a64c-793d-4b65-9d67-5cc75d255c84.pdf",
+      "source_status": "official_pdf_identified",
+      "content_status": "needs_full_transcription_and_review",
+      "notes": "Do not confuse this recruitment selection exam with UPTET eligibility test."
+    },
+    {
+      "course_code": "UP_TGT",
+      "display_name": "UP TGT",
+      "syllabus_title": "Trained Graduate Teacher (TGT), revised syllabus effective 2026",
+      "scope": "Subject-wise TGT syllabus plus General Studies",
+      "official_page": "https://upessc.up.gov.in/Home/Syllabus_all",
+      "source_status": "official_index_identified",
+      "content_status": "needs_subject_selection_and_full_transcription",
+      "notes": "2026 revised scheme is reported as 120 MCQs: 30 General Studies + 90 subject-specific; verify exact marking and subject PDF from the official notice before seeding."
+    },
+    {
+      "course_code": "UP_PRT",
+      "display_name": "UP PRT",
+      "syllabus_title": "Primary-level syllabus requires course identity confirmation",
+      "scope": "Potentially UPTET Paper I (Classes I–V) or Assistant Teacher recruitment syllabus",
+      "official_uptet_paper_i_pdf": "https://www.upessc.up.gov.in/syllabus/ede204de-908b-435f-9028-5fe87a4d460c.pdf",
+      "official_recruitment_pdf": "https://www.upessc.up.gov.in/syllabus/837218cf-1d9a-4252-a08c-404719d1b9d9.pdf",
+      "source_status": "official_pdf_candidates_identified",
+      "content_status": "identity_confirmation_and_full_transcription_required",
+      "notes": "Keep UPTET Paper I eligibility test separate from the Assistant Teacher recruitment selection syllabus."
+    },
+    {
+      "course_code": "UP_JUNIOR",
+      "display_name": "UP Junior",
+      "syllabus_title": "UPTET Paper II – Upper Primary (Classes VI–VIII)",
+      "official_pdf": "https://www.upessc.up.gov.in/syllabus/6f31864c-e9ce-4e7c-aa44-77924ddc8213.pdf",
+      "source_status": "official_pdf_identified",
+      "content_status": "structured_bilingual_draft_exists_needs_full_official_verification",
+      "seed_file": "admin/data/uptet-paper-ii-syllabus-2026.json",
+      "notes": "User confirmed UP Junior means UPTET Paper II."
+    }
+  ],
+  "implementation_policy": {
+    "no_live_database_write": true,
+    "no_student_app_publish_until_admin_approval": true,
+    "import_strategy": "idempotent upsert after validating existing exam codes and database schema",
+    "language": "Hindi and English",
+    "workflow": [
+      "official source verification",
+      "full topic transcription",
+      "admin preview",
+      "duplicate and mapping validation",
+      "admin-confirmed import",
+      "publish to student app"
+    ]
+  }
+}
