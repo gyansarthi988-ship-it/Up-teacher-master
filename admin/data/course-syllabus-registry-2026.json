@@ -7,33 +7,35 @@
     {
       "course_code": "SUPER_TET",
       "display_name": "UP Super TET",
-      "syllabus_title": "Assistant Teacher Recruitment Examination",
+      "syllabus_title": "Assistant Teacher Recruitment Examination (commonly called Super TET)",
       "scope": "Primary teacher recruitment selection examination",
       "official_pdf": "https://www.upessc.up.gov.in/syllabus/3c14a64c-793d-4b65-9d67-5cc75d255c84.pdf",
       "source_status": "official_pdf_identified",
-      "content_status": "needs_full_transcription_and_review",
-      "notes": "Do not confuse this recruitment selection exam with UPTET eligibility test."
+      "content_status": "exam_pattern_draft_added_full_official_section_transcription_pending",
+      "notes": "Separate from UPTET Paper I and II. Do not publish a guessed section split; transcribe official PDF first.",
+      "seed_file": "admin/data/super-tet-syllabus-2026.json"
     },
     {
       "course_code": "UP_TGT",
       "display_name": "UP TGT",
-      "syllabus_title": "Trained Graduate Teacher (TGT), revised syllabus effective 2026",
+      "syllabus_title": "Trained Graduate Teacher (TGT), 2026 revised subject-wise syllabus",
       "scope": "Subject-wise TGT syllabus plus General Studies",
       "official_page": "https://upessc.up.gov.in/Home/Syllabus_all",
-      "source_status": "official_index_identified",
-      "content_status": "needs_subject_selection_and_full_transcription",
-      "notes": "2026 revised scheme is reported as 120 MCQs: 30 General Studies + 90 subject-specific; verify exact marking and subject PDF from the official notice before seeding."
+      "source_status": "official_index_and_2026_subject_list_identified",
+      "content_status": "common_GK_outline_added_subject_PDF_transcription_pending",
+      "notes": "2026 pattern draft: 120 MCQs, 30 common GK + 90 concerned subject, 360 marks, 120 minutes, +3/-1. Exact subject PDFs must be transcribed separately.",
+      "seed_file": "admin/data/up-tgt-syllabus-2026.json"
     },
     {
       "course_code": "UP_PRT",
       "display_name": "UP PRT",
-      "syllabus_title": "UPTET Paper I – Primary (Classes I–V) candidate mapping",
-      "scope": "Potentially UPTET Paper I (Classes I–V) or Assistant Teacher recruitment syllabus",
+      "syllabus_title": "UPTET Paper I – Primary (Classes I–V)",
+      "scope": "Eligibility test for primary level, distinct from Assistant Teacher Recruitment Examination (Super TET)",
       "official_uptet_paper_i_pdf": "https://www.upessc.up.gov.in/syllabus/ede204de-908b-435f-9028-5fe87a4d460c.pdf",
       "official_recruitment_pdf": "https://www.upessc.up.gov.in/syllabus/837218cf-1d9a-4252-a08c-404719d1b9d9.pdf",
-      "source_status": "official_2026_booklet_and_pdf_verified",
-      "content_status": "bilingual_topic_outline_prepared_pending_course_identity_confirmation_and_admin_review",
-      "notes": "Prepared as the likely meaning of PRT. Keep unpublished until the course owner confirms PRT means UPTET Paper I rather than a separate primary recruitment selection exam.",
+      "source_status": "official_2026_booklet_and_pdf_identified",
+      "content_status": "bilingual_topic_outline_partial_pending_full_official_verification",
+      "notes": "UP PRT course provisionally mapped to UPTET Paper I; confirm this mapping before publishing. Super TET is maintained separately.",
       "seed_file": "admin/data/uptet-paper-i-syllabus-2026.json",
       "official_pdf": "https://www.upessc.up.gov.in/syllabus/ede204de-908b-435f-9028-5fe87a4d460c.pdf"
     },
