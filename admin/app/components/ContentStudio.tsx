@@ -252,7 +252,7 @@ export default function ContentStudio() {
           <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">UP TGT · 2026 revised syllabus</p>
           <h2 className="mt-1 text-lg font-bold text-slate-900">{upTgt2026.exam_name_en}</h2>
           <p className="text-sm text-slate-700">{upTgt2026.exam_name_hi}</p>
-          <p className="mt-2 text-sm text-slate-700">120 MCQs · 360 marks · 120 minutes · +3 / −1</p>
+          <p className="mt-2 text-sm text-slate-700">Official subject-wise syllabus index identified · pattern verification pending</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {upTgt2026.general_knowledge.map((unit:any)=><div key={unit.unit} className="rounded-lg bg-white p-3"><b className="block text-sm">{unit.unit}</b><span className="text-xs text-slate-600">{unit.unit_hi}</span><span className="mt-1 block text-xs text-indigo-700">{unit.topics.length} topic groups</span></div>)}
           </div>
