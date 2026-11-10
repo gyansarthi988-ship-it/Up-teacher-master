@@ -1,0 +1,407 @@
+{
+  "schema_version": 1,
+  "exam_code": "UPTET1",
+  "exam_name_en": "UPTET Paper I – Primary (Classes I–V)",
+  "exam_name_hi": "UPTET पेपर I – प्राथमिक स्तर (कक्षा 1–5)",
+  "source": {
+    "authority": "UPESSC",
+    "document": "UPTET 2026 Information Booklet, Advt. 01/UPTET/2026, Appendix 5",
+    "official_page": "https://upessc.up.gov.in/Home/Syllabus_all",
+    "official_pdf": "https://www.upessc.up.gov.in/syllabus/ede204de-908b-435f-9028-5fe87a4d460c.pdf",
+    "verified_date": "2026-11-10"
+  },
+  "pattern": {
+    "questions": 150,
+    "marks": 150,
+    "duration_minutes": 150,
+    "negative_marking": false,
+    "sections": [
+      {
+        "code": "CDP",
+        "name_en": "Child Development & Pedagogy",
+        "name_hi": "बाल विकास एवं शिक्षण विधियाँ",
+        "questions": 30,
+        "compulsory": true
+      },
+      {
+        "code": "HIN",
+        "name_en": "Language I – Hindi",
+        "name_hi": "भाषा I – हिन्दी",
+        "questions": 30,
+        "compulsory": true
+      },
+      {
+        "code": "LANG2",
+        "name_en": "Language II – English / Urdu / Sanskrit",
+        "name_hi": "भाषा II – अंग्रेज़ी / उर्दू / संस्कृत",
+        "questions": 30,
+        "compulsory": true
+      },
+      {
+        "code": "MATH",
+        "name_en": "Mathematics",
+        "name_hi": "गणित",
+        "questions": 30,
+        "compulsory": true
+      },
+      {
+        "code": "EVS",
+        "name_en": "Environmental Studies",
+        "name_hi": "पर्यावरणीय अध्ययन",
+        "questions": 30,
+        "compulsory": true
+      }
+    ]
+  },
+  "transcription_status": "pattern_verified_topic_outline_partial",
+  "subjects": [
+    {
+      "code": "CDP",
+      "name_en": "Child Development & Pedagogy",
+      "name_hi": "बाल विकास एवं शिक्षण विधियाँ",
+      "chapters": [
+        {
+          "code": "CDP-DEV",
+          "name_en": "Child Development",
+          "name_hi": "बाल विकास",
+          "topics": [
+            [
+              "Meaning, need, scope and stages of child development",
+              "बाल विकास का अर्थ, आवश्यकता, क्षेत्र एवं अवस्थाएँ"
+            ],
+            [
+              "Physical, mental, emotional and language development",
+              "शारीरिक, मानसिक, संवेगात्मक एवं भाषा विकास"
+            ],
+            [
+              "Creativity and creative ability",
+              "सृजनात्मकता एवं सृजनात्मक क्षमता"
+            ],
+            [
+              "Heredity and environment: family, society, school and media",
+              "वंशानुक्रम एवं वातावरण: परिवार, समाज, विद्यालय एवं संचार माध्यम"
+            ]
+          ]
+        },
+        {
+          "code": "CDP-LEARN",
+          "name_en": "Learning and Theories",
+          "name_hi": "अधिगम एवं सिद्धांत",
+          "topics": [
+            [
+              "Meaning and factors affecting learning; effective methods",
+              "अधिगम का अर्थ, प्रभावित करने वाले कारक एवं प्रभावी विधियाँ"
+            ],
+            [
+              "Thorndike's laws of learning",
+              "थॉर्नडाइक के अधिगम के नियम"
+            ],
+            [
+              "Trial and error, classical conditioning, operant conditioning, insight, Piaget and Vygotsky",
+              "प्रयास-त्रुटि, सम्बद्ध प्रतिक्रिया, क्रिया-प्रसूत, सूझ, पियाजे एवं वाइगोत्स्की के सिद्धांत"
+            ],
+            [
+              "Learning curve, plateau and remedies",
+              "अधिगम वक्र, पठार एवं निराकरण"
+            ]
+          ]
+        },
+        {
+          "code": "CDP-TEACH",
+          "name_en": "Teaching, Inclusion and Guidance",
+          "name_hi": "शिक्षण, समावेशन एवं निर्देशन",
+          "topics": [
+            [
+              "Teaching objectives, principles, maxims, methods and micro-teaching",
+              "शिक्षण उद्देश्य, सिद्धांत, सूत्र, विधियाँ एवं सूक्ष्म शिक्षण"
+            ],
+            [
+              "Inclusive education, barriers, tools, TLM and special methods",
+              "समावेशी शिक्षा, बाधाएँ, उपकरण, TLM एवं विशेष शिक्षण विधियाँ"
+            ],
+            [
+              "Guidance and counselling: meaning, purpose, types and agencies",
+              "निर्देशन एवं परामर्श: अर्थ, उद्देश्य, प्रकार एवं सहयोगी संस्थाएँ"
+            ],
+            [
+              "How children think, learn and fail; social context and learning strategies",
+              "बच्चे कैसे सोचते-सीखते हैं, असफलता के कारण, सामाजिक संदर्भ एवं अधिगम रणनीतियाँ"
+            ],
+            [
+              "Problem solving, misconceptions, perception, motivation and learner factors",
+              "समस्या समाधान, भ्रांतियाँ, बोध, प्रेरणा एवं शिक्षार्थी संबंधी कारक"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "HIN",
+      "name_en": "Language I – Hindi",
+      "name_hi": "भाषा I – हिन्दी",
+      "chapters": [
+        {
+          "code": "HIN-CONT",
+          "name_en": "Hindi Language Content",
+          "name_hi": "हिन्दी भाषा विषयवस्तु",
+          "topics": [
+            [
+              "Unseen passage",
+              "अपठित अनुच्छेद"
+            ],
+            [
+              "Hindi alphabet, vowels, consonants, matras and word formation",
+              "हिन्दी वर्णमाला, स्वर-व्यंजन, मात्राएँ एवं शब्द निर्माण"
+            ],
+            [
+              "Sentence formation and punctuation",
+              "वाक्य रचना एवं विराम चिह्न"
+            ],
+            [
+              "Sounds, spelling, conjunct letters, anusvar and chandrabindu",
+              "ध्वनियाँ, वर्तनी, संयुक्ताक्षर, अनुस्वार एवं चन्द्रबिन्दु"
+            ],
+            [
+              "Synonyms, antonyms, rhyming words and idioms",
+              "पर्यायवाची, विलोम, तुकांत शब्द एवं मुहावरे"
+            ],
+            [
+              "Parts of speech, gender, number and tense",
+              "शब्द-भेद, लिंग, वचन एवं काल"
+            ],
+            [
+              "Prefixes, suffixes, tatsam-tadbhav, sandhi, samas, voice and figures of speech",
+              "उपसर्ग, प्रत्यय, तत्सम-तद्भव, संधि, समास, वाच्य एवं अलंकार"
+            ]
+          ]
+        },
+        {
+          "code": "HIN-PED",
+          "name_en": "Language Development Pedagogy",
+          "name_hi": "भाषा विकास का अध्ययन",
+          "topics": [
+            [
+              "Learning and acquisition; principles of language learning",
+              "अधिगम एवं अर्जन; भाषा अध्ययन के सिद्धांत"
+            ],
+            [
+              "Listening and speaking; language as a tool",
+              "सुनना-बोलना; भाषा एक उपकरण के रूप में"
+            ],
+            [
+              "Grammar in oral and written communication",
+              "मौखिक एवं लिखित संप्रेषण में व्याकरण"
+            ],
+            [
+              "Multilingual classroom challenges, language skills and assessment",
+              "बहुभाषी कक्षा की चुनौतियाँ, भाषा कौशल एवं आकलन"
+            ],
+            [
+              "Teaching-learning materials and remedial teaching",
+              "शिक्षण-अधिगम सामग्री एवं उपचारात्मक शिक्षण"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "ENG",
+      "name_en": "Language II – English",
+      "name_hi": "भाषा II – अंग्रेज़ी",
+      "chapters": [
+        {
+          "code": "ENG-CONT",
+          "name_en": "English Language Content",
+          "name_hi": "अंग्रेज़ी भाषा विषयवस्तु",
+          "topics": [
+            [
+              "Unseen passage",
+              "अपठित गद्यांश"
+            ],
+            [
+              "Sentences: subject, predicate and kinds",
+              "वाक्य: कर्ता, विधेय एवं वाक्य के प्रकार"
+            ],
+            [
+              "Parts of speech: noun, pronoun, adverb, adjective, verb, preposition and conjunction",
+              "Parts of Speech: Noun, Pronoun, Adverb, Adjective, Verb, Preposition एवं Conjunction"
+            ],
+            [
+              "Present, past and future tenses",
+              "वर्तमान, भूत एवं भविष्य काल"
+            ],
+            [
+              "Articles, punctuation and word formation",
+              "Articles, विराम चिह्न एवं शब्द निर्माण"
+            ],
+            [
+              "Active and passive voice; singular/plural; gender",
+              "Active-Passive Voice; एकवचन-बहुवचन; लिंग"
+            ]
+          ]
+        },
+        {
+          "code": "ENG-PED",
+          "name_en": "English Language Pedagogy",
+          "name_hi": "अंग्रेज़ी भाषा शिक्षणशास्त्र",
+          "topics": [
+            [
+              "Language acquisition and learning principles",
+              "भाषा अर्जन एवं अधिगम के सिद्धांत"
+            ],
+            [
+              "Role of listening and speaking",
+              "सुनने एवं बोलने की भूमिका"
+            ],
+            [
+              "Grammar in communication",
+              "संचार में व्याकरण"
+            ],
+            [
+              "Language learning challenges, errors and development",
+              "भाषा अधिगम की चुनौतियाँ, त्रुटियाँ एवं विकास"
+            ],
+            [
+              "LSRW skills, assessment, TLM and remedial teaching",
+              "LSRW कौशल, आकलन, TLM एवं उपचारात्मक शिक्षण"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "MATH",
+      "name_en": "Mathematics",
+      "name_hi": "गणित",
+      "chapters": [
+        {
+          "code": "MATH-CONT",
+          "name_en": "Mathematics Content",
+          "name_hi": "गणित विषयवस्तु",
+          "topics": [
+            [
+              "Numbers and four operations",
+              "संख्याएँ एवं चार मूल संक्रियाएँ"
+            ],
+            [
+              "LCM and HCF",
+              "लघुत्तम समापवर्त्य एवं महत्तम समापवर्तक"
+            ],
+            [
+              "Fractions and decimals",
+              "भिन्न एवं दशमलव"
+            ],
+            [
+              "Unitary method, percentage, profit and loss, simple interest",
+              "ऐकिक नियम, प्रतिशत, लाभ-हानि एवं साधारण ब्याज"
+            ],
+            [
+              "Geometry: shapes, surfaces, angles, triangles and circles",
+              "ज्यामिति: आकृतियाँ, पृष्ठ, कोण, त्रिभुज एवं वृत्त"
+            ],
+            [
+              "Money, measurement, perimeter, calendar and data",
+              "धन, मापन, परिमाप, कैलेंडर एवं आँकड़े"
+            ],
+            [
+              "Volume, capacity, area, timetables and data representation",
+              "आयतन, धारिता, क्षेत्रफल, समय-सारिणी एवं आँकड़ों का निरूपण"
+            ]
+          ]
+        },
+        {
+          "code": "MATH-PED",
+          "name_en": "Mathematics Pedagogy",
+          "name_hi": "गणित शिक्षणशास्त्र",
+          "topics": [
+            [
+              "Mathematical and logical thinking; learner strategies",
+              "गणितीय एवं तार्किक चिंतन; शिक्षार्थी रणनीतियाँ"
+            ],
+            [
+              "Place and language of mathematics in curriculum",
+              "पाठ्यचर्या में गणित का स्थान एवं भाषा"
+            ],
+            [
+              "Community mathematics and assessment",
+              "सामुदायिक गणित एवं आकलन"
+            ],
+            [
+              "Teaching problems, error analysis, diagnosis and remedial teaching",
+              "शिक्षण समस्याएँ, त्रुटि विश्लेषण, निदान एवं उपचारात्मक शिक्षण"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "EVS",
+      "name_en": "Environmental Studies",
+      "name_hi": "पर्यावरणीय अध्ययन",
+      "chapters": [
+        {
+          "code": "EVS-CONT",
+          "name_en": "EVS Content",
+          "name_hi": "पर्यावरणीय अध्ययन विषयवस्तु",
+          "topics": [
+            [
+              "Family, food, health, hygiene and shelter",
+              "परिवार, भोजन, स्वास्थ्य, स्वच्छता एवं आवास"
+            ],
+            [
+              "Plants, animals and our surroundings",
+              "पेड़-पौधे, जन्तु एवं हमारा परिवेश"
+            ],
+            [
+              "Fairs, local occupations and community",
+              "मेले, स्थानीय व्यवसाय एवं समुदाय"
+            ],
+            [
+              "Water, transport and communication; games and sportsmanship",
+              "जल, यातायात एवं संचार; खेल एवं खेल भावना"
+            ],
+            [
+              "India and Uttar Pradesh: rivers, mountains, plateaus, forests and transport",
+              "भारत एवं उत्तर प्रदेश: नदियाँ, पर्वत, पठार, वन एवं यातायात"
+            ],
+            [
+              "Constitution, governance, local self-government and national symbols",
+              "संविधान, शासन व्यवस्था, स्थानीय स्वशासन एवं राष्ट्रीय प्रतीक"
+            ],
+            [
+              "Environment, conservation and public responsibility",
+              "पर्यावरण, संरक्षण एवं सामाजिक दायित्व"
+            ]
+          ]
+        },
+        {
+          "code": "EVS-PED",
+          "name_en": "EVS Pedagogy",
+          "name_hi": "पर्यावरणीय अध्ययन शिक्षणशास्त्र",
+          "topics": [
+            [
+              "Concept, scope and importance of EVS and environmental education",
+              "EVS एवं पर्यावरण शिक्षा की अवधारणा, व्याप्ति एवं महत्व"
+            ],
+            [
+              "Learning theories and integrated EVS",
+              "अधिगम सिद्धांत एवं एकीकृत EVS"
+            ],
+            [
+              "Science and social science: scope and relationship",
+              "विज्ञान एवं सामाजिक विज्ञान की व्याप्ति और संबंध"
+            ],
+            [
+              "Activities, experiments, discussion and continuous assessment",
+              "गतिविधियाँ, प्रयोग, चर्चा एवं सतत मूल्यांकन"
+            ],
+            [
+              "Teaching-learning materials, tools and classroom challenges",
+              "शिक्षण-अधिगम सामग्री, उपकरण एवं कक्षा की चुनौतियाँ"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}
