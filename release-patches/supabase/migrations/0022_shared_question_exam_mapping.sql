@@ -36,7 +36,7 @@ as $$
 begin
   if auth.uid() is null then raise exception 'Authentication required'; end if;
   return query
-  select q.id, q.subject_id, q.topic_id, q.difficulty, q.question_hi, q.question_en,
+  select q.id, q.subject_id, q.topic_id, q.difficulty::text, q.question_hi, q.question_en,
          q.marks, q.negative_marks,
          coalesce((
            select jsonb_agg(jsonb_build_object(
