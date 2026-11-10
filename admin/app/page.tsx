@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import ContentStudio from "./components/ContentStudio";
 import MockTestBuilder from "./components/MockTestBuilder";
@@ -11,15 +11,17 @@ import AnnouncementManager from "./components/AnnouncementManager";
 import DoubtReviewCenter from "./components/DoubtReviewCenter";
 
 type Exam = { id: string; code: string; name_en: string; name_hi: string };
-
-// Never treat an arbitrary non-student role as an administrator.
-const ADMIN_ROLES = new Set([
-  "super_admin",
-  "content_admin",
-  "question_manager",
-  "test_manager",
-  "support_staff",
-]);
+type Section = "overview" | "questions" | "mocks" | "content" | "announcements" | "doubts" | "access";
+const ADMIN_ROLES = new Set(["super_admin", "content_admin", "question_manager", "test_manager", "support_staff"]);
+const NAV: { id: Section; label: string; hint: string; icon: string }[] = [
+  { id: "overview", label: "Overview", hint: "Dashboard", icon: "▦" },
+  { id: "questions", label: "Question Bank", hint: "Import · review · publish", icon: "▤" },
+  { id: "mocks", label: "Mock Tests", hint: "Complete · subject-wise", icon: "◷" },
+  { id: "content", label: "Study Material", hint: "Courses · syllabus · files", icon: "▣" },
+  { id: "announcements", label: "Announcements", hint: "Student communication", icon: "◉" },
+  { id: "doubts", label: "Doubt Centre", hint: "Student support", icon: "◎" },
+  { id: "access", label: "Free Access", hint: "Access settings", icon: "◇" },
+];
 
 export default function AdminHome() {
   const [email, setEmail] = useState("");
@@ -30,148 +32,97 @@ export default function AdminHome() {
   const [exams, setExams] = useState<Exam[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [section, setSection] = useState<Section>("overview");
+  const [mobileNav, setMobileNav] = useState(false);
   const [questionBankVersion, setQuestionBankVersion] = useState(0);
+  const [stats, setStats] = useState({ students: "—", questions: "—", materials: "—", exams: "—" });
 
   async function refresh() {
-    setChecking(true);
-    setError("");
+    setChecking(true); setError("");
     try {
-      // A visitor without a session is expected on the public login page.
-      // Check the local session first so Supabase's "Auth session missing"
-      // response is not shown as a login error.
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setUser(null);
-        setAllowed(false);
-        setExams([]);
-        return;
-      }
-
-      // Once a session exists, verify the user against Supabase Auth.
+      if (!session) { setUser(null); setAllowed(false); setExams([]); return; }
       const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       setUser(currentUser?.email ?? currentUser?.phone ?? null);
-      if (!currentUser) {
-        setAllowed(false);
-        setExams([]);
-        return;
-      }
-
-      const { data, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", currentUser.id);
+      if (!currentUser) { setAllowed(false); setExams([]); return; }
+      const { data, error: roleError } = await supabase.from("user_roles").select("role").eq("user_id", currentUser.id);
       if (roleError) throw roleError;
-
       const roles = (data ?? []).map((item: { role: string }) => item.role);
       const isAdmin = roles.some((role) => ADMIN_ROLES.has(role));
       setAllowed(isAdmin);
-      if (!isAdmin) {
-        setExams([]);
-        return;
-      }
-
-      const result = await supabase
-        .from("exams")
-        .select("id,code,name_en,name_hi")
-        .order("display_order");
+      if (!isAdmin) { setExams([]); return; }
+      const result = await supabase.from("exams").select("id,code,name_en,name_hi").order("display_order");
       if (result.error) throw result.error;
       setExams(result.data ?? []);
+      const [students, questions, materials] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("questions").select("id", { count: "exact", head: true }),
+        supabase.from("study_materials").select("id", { count: "exact", head: true }),
+      ]);
+      setStats({ students: students.error ? "—" : String(students.count ?? 0), questions: questions.error ? "—" : String(questions.count ?? 0), materials: materials.error ? "—" : String(materials.count ?? 0), exams: String(result.data?.length ?? 0) });
     } catch (err) {
-      setAllowed(false);
-      setExams([]);
+      setAllowed(false); setExams([]);
       setError(err instanceof Error ? err.message : "Unable to verify administrator access.");
-    } finally {
-      setChecking(false);
-    }
+    } finally { setChecking(false); }
   }
 
-  useEffect(() => {
-    // Verify once on page load. Sign-in and sign-out explicitly update state;
-    // background auth events must not replace the import UI with a full-page
-    // verification screen when Android's document picker returns to the WebView.
-    void refresh();
-  }, []);
+  useEffect(() => { void refresh(); }, []);
 
   async function signIn(event: FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    setError("");
+    event.preventDefault(); setBusy(true); setError("");
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (signInError) throw signInError;
       await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign-in failed.");
-    } finally {
-      setBusy(false);
-    }
+    } catch (err) { setError(err instanceof Error ? err.message : "Sign-in failed."); }
+    finally { setBusy(false); }
   }
 
   async function signOut() {
-    setBusy(true);
-    const { error: signOutError } = await supabase.auth.signOut();
-    setBusy(false);
-    if (signOutError) {
-      setError(signOutError.message);
-      return;
-    }
-    setEmail("");
-    setPassword("");
-    setUser(null);
-    setAllowed(false);
-    setExams([]);
-    setError("");
+    setBusy(true); const { error: signOutError } = await supabase.auth.signOut(); setBusy(false);
+    if (signOutError) { setError(signOutError.message); return; }
+    setEmail(""); setPassword(""); setUser(null); setAllowed(false); setExams([]); setError("");
   }
 
-  if (checking) return <main><section className="card"><p>Verifying secure administrator access…</p></section></main>;
+  const activeNav = useMemo(() => NAV.find((item) => item.id === section) ?? NAV[0], [section]);
+  function go(id: Section) { setSection(id); setMobileNav(false); window.scrollTo({ top: 0, behavior: "smooth" }); }
 
-  if (!user) return <main><section className="card" style={{maxWidth:440,margin:"8vh auto"}}>
-    <h1>UP Teacher Master</h1><p className="muted">Private Admin Control Panel</p>
-    <form onSubmit={signIn}>
-      <label>Email</label><input type="email" autoComplete="username" required value={email} onChange={event=>setEmail(event.target.value)} />
-      <label>Password</label><input type="password" autoComplete="current-password" required value={password} onChange={event=>setPassword(event.target.value)} />
-      <button disabled={busy}>{busy ? "Signing in…" : "Admin Sign In"}</button>
-    </form>
-    {error && <p role="alert" style={{color:"crimson"}}>{error}</p>}
-    <small>Access is limited to accounts explicitly assigned an administrator role. Public admin registration is disabled.</small>
+  if (checking) return <main className="auth-wrap"><section className="auth-card"><div className="brand-mark">UT</div><h1>UP Teacher Master</h1><p className="muted">Verifying secure administrator access…</p></section></main>;
+  if (!user) return <main className="auth-wrap"><section className="auth-card">
+    <div className="brand-mark">UT</div><p className="eyebrow">ADMINISTRATION PORTAL</p><h1>Welcome back</h1><p className="muted">Sign in with your authorised administrator account.</p>
+    <form onSubmit={signIn}><label>Email address</label><input type="email" autoComplete="username" required value={email} onChange={event=>setEmail(event.target.value)} placeholder="admin@example.com" /><label>Password</label><input type="password" autoComplete="current-password" required value={password} onChange={event=>setPassword(event.target.value)} placeholder="Enter password" /><button className="btn-primary btn-wide" disabled={busy}>{busy ? "Signing in…" : "Sign in to Admin"}</button></form>
+    {error && <p role="alert" className="error-text">{error}</p>}<p className="auth-foot">Private access · Admin accounts only · Student registration is separate</p>
   </section></main>;
+  if (!allowed) return <main className="auth-wrap"><section className="auth-card"><div className="brand-mark">UT</div><h1>Access not authorised</h1><p>This account does not have an approved administrator role.</p>{error && <p role="alert" className="error-text">{error}</p>}<button className="btn-primary" disabled={busy} onClick={()=>void signOut()}>Sign out</button></section></main>;
 
-  if (!allowed) return <main><section className="card">
-    <h1>Access not authorized</h1><p>This account does not have an approved administrator role.</p>
-    {error && <p role="alert" style={{color:"crimson"}}>{error}</p>}
-    <button disabled={busy} onClick={()=>void signOut()}>Sign out</button>
-  </section></main>;
-
-  return <main>
-    <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12}}>
-      <div><h1>UP Teacher Master</h1><p className="muted">Private Admin Control Centre · {user}</p></div>
-      <button disabled={busy} onClick={()=>void signOut()}>Sign out</button>
-    </header>
-    <div className="grid">
-      {[
-        ["Examinations", String(exams.length)],
-        ["Content Management", "Phase 2"],
-        ["Question Bank", "Phase 2"],
-        ["Mock Tests", "Phase 3"]
-      ].map(([label,value])=><section className="card" key={label}><small>{label}</small><h2>{value}</h2></section>)}
+  return <div className="admin-shell">
+    <aside className={mobileNav ? "sidebar sidebar-open" : "sidebar"}>
+      <div className="sidebar-brand"><div className="brand-mark">UT</div><div><strong>UP Teacher</strong><span>MASTER CONTROL</span></div><button className="mobile-close" onClick={()=>setMobileNav(false)} aria-label="Close menu">×</button></div>
+      <div className="workspace-label">WORKSPACE</div>
+      <nav className="side-nav">{NAV.map(item=><button key={item.id} className={section===item.id?"nav-item nav-active":"nav-item"} onClick={()=>go(item.id)}><span className="nav-icon">{item.icon}</span><span className="nav-copy"><b>{item.label}</b><small>{item.hint}</small></span>{section===item.id&&<i />}</button>)}</nav>
+      <div className="sidebar-bottom"><div className="secure-pill"><span /> Secure admin session</div><div className="user-mini"><div className="avatar">{(user[0]??"A").toUpperCase()}</div><div className="user-copy"><b>Administrator</b><small>{user}</small></div><button className="logout-icon" onClick={()=>void signOut()} title="Sign out">↗</button></div></div>
+    </aside>
+    {mobileNav&&<button className="nav-scrim" onClick={()=>setMobileNav(false)} aria-label="Close navigation" />}
+    <div className="admin-main">
+      <header className="topbar"><button className="menu-toggle" onClick={()=>setMobileNav(true)} aria-label="Open menu">☰</button><div className="breadcrumb">Workspace <span>/</span> <b>{activeNav.label}</b></div><div className="topbar-right"><span className="live-dot" /> <span className="topbar-status">Connected</span><div className="top-avatar">{(user[0]??"A").toUpperCase()}</div></div></header>
+      <main className="page-content">
+        {error&&<div className="notice-error" role="alert">{error}</div>}
+        {section==="overview"&&<><div className="page-heading"><div><p className="eyebrow">ADMIN WORKSPACE</p><h1>Good to see you.</h1><p className="muted">Here’s what’s happening across UP Teacher Master today.</p></div><span className="date-chip">● Live workspace</span></div>
+          <div className="stat-grid"><article className="stat-card"><span className="stat-icon indigo">♙</span><small>Total student profiles</small><strong>{stats.students}</strong><span className="stat-foot">Registered accounts</span></article><article className="stat-card"><span className="stat-icon blue">▤</span><small>Question bank</small><strong>{stats.questions}</strong><span className="stat-foot">Questions in database</span></article><article className="stat-card"><span className="stat-icon green">▣</span><small>Study materials</small><strong>{stats.materials}</strong><span className="stat-foot">Learning resources</span></article><article className="stat-card"><span className="stat-icon amber">◇</span><small>Examinations</small><strong>{stats.exams}</strong><span className="stat-foot">Configured courses</span></article></div>
+          <div className="overview-grid"><section className="panel-card"><div className="panel-heading"><div><h2>Quick actions</h2><p>Jump straight into your daily work.</p></div></div><div className="quick-grid"><button onClick={()=>go("questions")}><span>＋</span><b>Upload questions</b><small>Excel, CSV or Word</small></button><button onClick={()=>go("mocks")}><span>◷</span><b>Create mock test</b><small>Full or subject-wise</small></button><button onClick={()=>go("content")}><span>▣</span><b>Manage content</b><small>Study material & syllabus</small></button><button onClick={()=>go("announcements")}><span>◉</span><b>Send announcement</b><small>Reach your students</small></button></div></section>
+          <section className="panel-card"><div className="panel-heading"><div><h2>Exam courses</h2><p>Configured examinations in the system.</p></div></div><div className="exam-list">{exams.map((exam,index)=><div className="exam-row" key={exam.id}><span className="exam-number">{String(index+1).padStart(2,"0")}</span><div><b>{exam.name_en}</b><small>{exam.name_hi}</small></div><span className="exam-code">{exam.code}</span></div>)}{!exams.length&&<p className="muted">No examinations configured yet.</p>}</div></section></div>
+          <section className="panel-card module-overview"><div className="panel-heading"><div><h2>Management modules</h2><p>All administration tools, organised in one place.</p></div></div><div className="module-grid">{NAV.filter(x=>x.id!=="overview").map(item=><button key={item.id} onClick={()=>go(item.id)}><span className="module-icon">{item.icon}</span><b>{item.label}</b><small>{item.hint}</small><span className="module-arrow">→</span></button>)}</div></section>
+        </>}
+        {section!=="overview"&&<div className="page-heading"><div><p className="eyebrow">MANAGEMENT MODULE</p><h1>{activeNav.label}</h1><p className="muted">{activeNav.hint}</p></div><button className="btn-secondary" onClick={()=>go("overview")}>← Dashboard</button></div>}
+        {section==="questions"&&<><div className="module-intro"><b>Question workflow</b><span>Choose exam → choose subject → import → preview → approve → publish.</span></div><QuestionBulkImportCenter exams={exams} onImported={()=>setQuestionBankVersion(v=>v+1)} /><QuestionQualityCenter key={questionBankVersion} /></>}
+        {section==="mocks"&&<MockTestBuilder exams={exams} />}
+        {section==="content"&&<ContentStudio />}
+        {section==="announcements"&&<AnnouncementManager exams={exams} />}
+        {section==="doubts"&&<DoubtReviewCenter />}
+        {section==="access"&&<><div className="module-intro"><b>Free access policy</b><span>UP Teacher Master is configured as a free-to-use student app. No paid membership or checkout is enabled in this admin workspace.</span></div><MembershipManager /></>}
+        <footer className="admin-footer"><span>UP Teacher Master · Admin Control Centre</span><span>Private workspace · v2 interface</span></footer>
+      </main>
     </div>
-    <section className="card">
-      <h2>Configured examinations</h2>
-      {exams.map(exam=><p key={exam.id}><b>{exam.name_en}</b> · {exam.name_hi} <small>({exam.code})</small></p>)}
-      {!exams.length && <p className="muted">No active exams found. Run the Phase 1 database migration.</p>}
-    </section>
-    <nav aria-label="Admin quick actions" className="card" style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:20}}>
-      <a href="#question-upload" style={{border:"1px solid #cbd5e1",borderRadius:10,padding:"10px 14px",fontWeight:600}}>1. Upload Questions (Excel / Word)</a>
-      <a href="#mock-tests" style={{border:"1px solid #cbd5e1",borderRadius:10,padding:"10px 14px",fontWeight:600}}>2. Create / Update Mock Tests</a>
-      <a href="#content-management" style={{border:"1px solid #cbd5e1",borderRadius:10,padding:"10px 14px",fontWeight:600}}>3. Manage Course Content</a>
-    </nav>
-    <div id="question-upload"><QuestionBulkImportCenter exams={exams} onImported={async()=>{setQuestionBankVersion(version=>version+1);}} /></div>
-    <div id="mock-tests"><MockTestBuilder exams={exams} /></div>
-    <MembershipManager />
-    <div id="content-management"><ContentStudio /></div>
-    <div id="quality-control"><QuestionQualityCenter key={questionBankVersion} /></div>
-    <AnnouncementManager exams={exams} />
-    <DoubtReviewCenter />
-  </main>;
+  </div>;
 }
