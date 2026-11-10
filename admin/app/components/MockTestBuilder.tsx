@@ -18,6 +18,9 @@ export default function MockTestBuilder({ exams }: { exams:Exam[] }) {
   const [testType,setTestType] = useState<"complete"|"subject">("complete");
   const [subjectId,setSubjectId] = useState("");
   const [templates,setTemplates] = useState<Template[]>([]);
+  const [templateSearch,setTemplateSearch] = useState("");
+  const [templateStatus,setTemplateStatus] = useState<"all"|"published"|"draft">("all");
+  const [templateSort,setTemplateSort] = useState<"display"|"title"|"questions">("display");
   const [examId,setExamId] = useState("");
   const [patternId,setPatternId] = useState("");
   const [editing,setEditing] = useState<string|null>(null);
@@ -48,7 +51,11 @@ export default function MockTestBuilder({ exams }: { exams:Exam[] }) {
   }
   useEffect(()=>{void load();},[]);
   const examPatterns = patterns.filter(p=>p.exam_id===examId);
-  const examTemplates = templates.filter(t=>!examId||t.exam_id===examId);
+  const examTemplates = useMemo(()=>templates
+    .filter(t=>!examId||t.exam_id===examId)
+    .filter(t=>templateStatus==="all"||(templateStatus==="published"?t.is_active:!t.is_active))
+    .filter(t=>(`${t.title_en} ${t.title_hi} ${exams.find(e=>e.id===t.exam_id)?.name_en??""}`).toLowerCase().includes(templateSearch.trim().toLowerCase()))
+    .sort((a,b)=>templateSort==="title"?a.title_en.localeCompare(b.title_en):templateSort==="questions"?b.question_count-a.question_count:a.display_order-b.display_order),[templates,examId,templateStatus,templateSearch,templateSort,exams]);
   function resetForm(){setEditing(null);setPatternId("");setTestType("complete");setSubjectId("");setTitleEn("");setTitleHi("");setDescEn("");setDescHi("");setDuration("120");setCount("100");setMarks("100");setPerQuestion("1");setNegative("0");setLanguage("bilingual");setActive(false);setOrder("0");}
   async function edit(t:Template){setEditing(t.id);setExamId(t.exam_id);setPatternId(t.exam_pattern_id??"");const {data,error}=await supabase.from("exam_subjects").select("subject_id").eq("exam_id",t.exam_id);if(error){setError(error.message);return;}setExamSubjectIds((data??[]).map(x=>x.subject_id));const dist=t.question_selection?.subject_distribution;const firstSubject=dist&&typeof dist==="object"?Object.keys(dist as Record<string,unknown>)[0]:"";setTestType(firstSubject?"subject":"complete");setSubjectId(firstSubject);setTitleEn(t.title_en);setTitleHi(t.title_hi);setDescEn("");setDescHi("");setDuration(String(t.duration_minutes));setCount(String(t.question_count));setMarks(String(t.total_marks));setPerQuestion(String(t.default_marks));setNegative(String(t.default_negative_marks));setLanguage(t.language_mode);setActive(t.is_active);setOrder(String(t.display_order));}
   async function save(e:FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setNotice("");setError("");try{
@@ -86,8 +93,8 @@ export default function MockTestBuilder({ exams }: { exams:Exam[] }) {
       <label className="flex items-center gap-2"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)} /> Publish immediately</label>
       <div style={{gridColumn:"1 / -1",display:"flex",gap:8,flexWrap:"wrap"}}><button className={primary} disabled={busy}>{busy?"Saving…":editing?"Update template":"Create template"}</button><button type="button" className={secondary} onClick={resetForm}>Clear form</button></div>
     </form>
-    <h3 style={{marginTop:24}}>Existing templates ({examTemplates.length})</h3>
+    <div style={{marginTop:26,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}><div><h3 style={{margin:"0 0 4px"}}>Existing templates</h3><small className="muted">Showing {examTemplates.length} of {templates.filter(t=>!examId||t.exam_id===examId).length} templates</small></div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}><input className={input} aria-label="Search mock templates" placeholder="Search title or exam…" value={templateSearch} onChange={e=>setTemplateSearch(e.target.value)} style={{minWidth:190}}/><select className={input} aria-label="Filter template status" value={templateStatus} onChange={e=>setTemplateStatus(e.target.value as "all"|"published"|"draft")}><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft only</option></select><select className={input} aria-label="Sort templates" value={templateSort} onChange={e=>setTemplateSort(e.target.value as "display"|"title"|"questions")}><option value="display">Default order</option><option value="title">Title A–Z</option><option value="questions">Most questions</option></select></div></div>
     {examTemplates.map(t=><div key={t.id} style={{borderTop:"1px solid #e2e8f0",padding:"12px 0",display:"flex",justifyContent:"space-between",gap:12,alignItems:"center",flexWrap:"wrap"}}><div><b>{t.title_en}</b><div className="muted" style={{fontSize:13}}>{t.question_count} questions · {t.duration_minutes} min · {t.total_marks} marks · {t.language_mode} · {(Object.keys(t.question_selection?.subject_distribution??{}).length>0?"Subject-wise mock":"Complete mock")} · Free for all students</div><small>{exams.find(e=>e.id===t.exam_id)?.name_en??"Exam"} · {t.is_active?"Published":"Draft / Unpublished"}</small></div><div style={{display:"flex",gap:6,flexWrap:"wrap"}}><button className={secondary} disabled={busy} onClick={()=>edit(t)}>Edit</button><button className={secondary} disabled={busy} onClick={()=>toggle(t)}>{t.is_active?"Unpublish":"Publish"}</button><button className={secondary} disabled={busy||t.is_active} onClick={()=>remove(t)}>Delete</button></div></div>)}
-    {!examTemplates.length&&<p className="muted">No mock-test templates found for this selection.</p>}
+    {!examTemplates.length&&<p className="muted" style={{padding:"18px 0"}}>{templateSearch||templateStatus!=="all"?"No templates match these search filters.":"No mock-test templates found for this selection."}</p>}
   </section>;
 }
