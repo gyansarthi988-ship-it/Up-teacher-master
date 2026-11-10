@@ -258,7 +258,7 @@ export default function ContentStudio() {
         exam_id:String(f.get("exam_id")||"")||null,
         subject_id:String(f.get("subject_id")||"")||null,
         material_type:"pdf",storage_path:path,file_size_bytes:file.size,
-        access_tier:String(f.get("access_tier")),uploaded_by:uid,status:"draft"
+        access_tier:"free",uploaded_by:uid,status:"draft"
       });
       if(dbErr) { await supabase.storage.from("study-materials").remove([path]); throw dbErr; }
       form.reset();
@@ -476,7 +476,7 @@ export default function ContentStudio() {
           <input name="title_hi" placeholder="शीर्षक (हिन्दी)" className={field}/>
           <select name="exam_id" className={field}><option value="">All / no exam selected</option>{exams.map(x=><option key={x.id} value={x.id}>{x.name_en}</option>)}</select>
           <select name="subject_id" className={field}><option value="">No subject selected</option>{subjects.map(x=><option key={x.id} value={x.id}>{x.name_en}</option>)}</select>
-          <select name="access_tier" className={field} value="free" disabled><option value="free">Free access</option></select>
+          <div className={field+" flex items-center gap-2"} aria-label="Free access for all study materials">✓ Free access for all learners</div>
           <input name="file" type="file" accept="application/pdf,.pdf" required className={field}/>
         </div>
         <p className="text-xs text-slate-500">PDF only · Maximum 50 MB · Uploaded as Draft. Student download/signed-link entitlement flow is implemented in a later phase.</p>
@@ -497,7 +497,7 @@ export default function ContentStudio() {
             <span>STUDY RESOURCE</span>
           </div>
           <div className="material-card-body">
-            <div className="flex flex-wrap items-center gap-2"><span className={"material-status "+(m.status==="published"?"is-published":"is-draft")}>{m.status==="published"?"Published":m.status.replace("_"," ")}</span><span className="material-tier">{m.access_tier==="free"?"Free access":"Premium"}</span></div>
+            <div className="flex flex-wrap items-center gap-2"><span className={"material-status "+(m.status==="published"?"is-published":"is-draft")}>{m.status==="published"?"Published":m.status.replace("_"," ")}</span><span className="material-tier">{m.access_tier==="free"?"Free access":"Legacy restricted access"}</span></div>
             <h3>{m.title_en || m.title_hi || "Untitled PDF"}</h3>
             {m.title_en&&m.title_hi&&<p className="material-title-hi">{m.title_hi}</p>}
             <p className="material-meta"><span>▤ {m.exam_id?exams.find(x=>x.id===m.exam_id)?.name_en||"Mapped exam":"All courses"}</span><span>◷ {new Date(m.created_at).toLocaleDateString()}</span></p>
