@@ -312,6 +312,7 @@ export default function ContentStudio() {
         <p className="text-sm text-slate-600">{subjects.length} subjects · {chapters.length} chapters · {topics.length} topics</p>
         <p className="mt-2 text-xs text-slate-500">Create subjects first, then chapters, topics, exam mappings and syllabus mappings. Confirm official syllabus before assigning topics to a recruitment exam.</p>
       </div>
+      </div>
     </div>}
     {tab==="questions" && <div className="space-y-4">
       <form onSubmit={createQuestion} className="card space-y-3">
