@@ -11,16 +11,36 @@ import AnnouncementManager from "./components/AnnouncementManager";
 import DoubtReviewCenter from "./components/DoubtReviewCenter";
 
 type Exam = { id: string; code: string; name_en: string; name_hi: string };
+type IconName = "grid" | "file" | "clock" | "book" | "bell" | "help" | "shield" | "search" | "activity" | "menu" | "logout" | "plus" | "arrow";
+function Icon({ name, size = 18, className = "" }: { name: IconName; size?: number; className?: string }) {
+  const paths: Record<IconName, string> = {
+    grid: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",
+    file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M8 13h8 M8 17h8",
+    clock: "M12 8v4l3 2 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
+    book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z",
+    bell: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9 M10 21h4",
+    help: "M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3 M12 17h.01 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
+    shield: "M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z M9 12l2 2 4-4",
+    search: "M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z M21 21l-4.35-4.35",
+    activity: "M3 12h4l3-8 4 16 3-8h4",
+    menu: "M4 6h16M4 12h16M4 18h16",
+    logout: "M10 17l5-5-5-5 M15 12H3 M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6",
+    plus: "M12 5v14 M5 12h14",
+    arrow: "M5 12h14 M12 5l7 7-7 7",
+  };
+  return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]} /></svg>;
+}
+
 type Section = "overview" | "questions" | "mocks" | "content" | "announcements" | "doubts" | "access";
 const ADMIN_ROLES = new Set(["super_admin", "content_admin", "question_manager", "test_manager", "support_staff"]);
-const NAV: { id: Section; label: string; hint: string; icon: string }[] = [
-  { id: "overview", label: "Overview", hint: "Dashboard", icon: "▦" },
-  { id: "questions", label: "Question Bank", hint: "Import · review · publish", icon: "▤" },
-  { id: "mocks", label: "Mock Tests", hint: "Complete · subject-wise", icon: "◷" },
-  { id: "content", label: "Study Material", hint: "Courses · syllabus · files", icon: "▣" },
-  { id: "announcements", label: "Announcements", hint: "Student communication", icon: "◉" },
-  { id: "doubts", label: "Doubt Centre", hint: "Student support", icon: "◎" },
-  { id: "access", label: "Free Access", hint: "Access settings", icon: "◇" },
+const NAV: { id: Section; label: string; hint: string; icon: IconName }[] = [
+  { id: "overview", label: "Overview", hint: "Dashboard", icon: "grid" },
+  { id: "questions", label: "Question Bank", hint: "Import · review · publish", icon: "file" },
+  { id: "mocks", label: "Mock Tests", hint: "Complete · subject-wise", icon: "clock" },
+  { id: "content", label: "Study Material", hint: "Courses · syllabus · files", icon: "book" },
+  { id: "announcements", label: "Announcements", hint: "Student communication", icon: "bell" },
+  { id: "doubts", label: "Doubt Centre", hint: "Student support", icon: "help" },
+  { id: "access", label: "Free Access", hint: "Access settings", icon: "shield" },
 ];
 
 export default function AdminHome() {
@@ -113,21 +133,21 @@ export default function AdminHome() {
     <aside className={mobileNav ? "sidebar sidebar-open" : "sidebar"}>
       <div className="sidebar-brand"><div className="brand-mark">UT</div><div><strong>UP Teacher</strong><span>MASTER CONTROL</span></div><button className="mobile-close" onClick={()=>setMobileNav(false)} aria-label="Close menu">×</button></div>
       <div className="workspace-label">WORKSPACE</div>
-      <nav className="side-nav">{NAV.map(item=><button key={item.id} className={section===item.id?"nav-item nav-active":"nav-item"} onClick={()=>go(item.id)}><span className="nav-icon">{item.icon}</span><span className="nav-copy"><b>{item.label}</b><small>{item.hint}</small></span>{section===item.id&&<i />}</button>)}</nav>
-      <div className="sidebar-bottom"><div className="secure-pill"><span /> Secure admin session</div><div className="user-mini"><div className="avatar">{(user[0]??"A").toUpperCase()}</div><div className="user-copy"><b>Administrator</b><small>{user}</small></div><button className="logout-icon" onClick={()=>void signOut()} title="Sign out">↗</button></div></div>
+      <nav className="side-nav">{NAV.map(item=><button key={item.id} className={section===item.id?"nav-item nav-active":"nav-item"} onClick={()=>go(item.id)}><span className="nav-icon"><Icon name={item.icon} size={17} /></span><span className="nav-copy"><b>{item.label}</b><small>{item.hint}</small></span>{section===item.id&&<i />}</button>)}</nav>
+      <div className="sidebar-bottom"><div className="secure-pill"><span /> Secure admin session</div><div className="user-mini"><div className="avatar">{(user[0]??"A").toUpperCase()}</div><div className="user-copy"><b>Administrator</b><small>{user}</small></div><button className="logout-icon" onClick={()=>void signOut()} title="Sign out" aria-label="Sign out"><Icon name="logout" size={15} /></button></div></div>
     </aside>
     {mobileNav&&<button className="nav-scrim" onClick={()=>setMobileNav(false)} aria-label="Close navigation" />}
     <div className="admin-main">
       <header className="topbar">
- <button className="menu-toggle" onClick={()=>setMobileNav(true)} aria-label="Open menu">☰</button>
+ <button className="menu-toggle" onClick={()=>setMobileNav(true)} aria-label="Open menu"><Icon name="menu" size={20}/></button>
  <div className="breadcrumb">Workspace <span>/</span> <b>{activeNav.label}</b></div>
  <div className="topbar-tools">
-  <div className="global-search-wrap"><span className="search-glyph">⌕</span>
+  <div className="global-search-wrap"><span className="search-glyph"><Icon name="search" size={17}/></span>
    <input id="admin-global-search" value={globalSearch} onChange={event=>{setGlobalSearch(event.target.value);setSearchOpen(true);}} onFocus={()=>setSearchOpen(true)} placeholder="Search modules..." aria-label="Search admin modules"/>
    <kbd>Ctrl K</kbd>
-   {searchOpen&&globalSearch.trim()&&<div className="search-results">{searchResults.length?searchResults.map(item=><button key={item.id} onClick={()=>go(item.id)}><span>{item.icon}</span><span><b>{item.label}</b><small>{item.hint}</small></span><i>↗</i></button>):<p>No matching modules found.</p>}</div>}
+   {searchOpen&&globalSearch.trim()&&<div className="search-results">{searchResults.length?searchResults.map(item=><button key={item.id} onClick={()=>go(item.id)}><span><Icon name={item.icon} size={16}/></span><span><b>{item.label}</b><small>{item.hint}</small></span><i>↗</i></button>):<p>No matching modules found.</p>}</div>}
   </div>
-  <div className="updates-wrap"><button className={updatesOpen?"icon-action icon-action-active":"icon-action"} onClick={()=>{setUpdatesOpen(v=>!v);setSearchOpen(false);}} aria-label="Open workspace updates" title="Workspace updates"><span>♧</span><i/></button>
+  <div className="updates-wrap"><button className={updatesOpen?"icon-action icon-action-active":"icon-action"} onClick={()=>{setUpdatesOpen(v=>!v);setSearchOpen(false);}} aria-label="Open workspace updates" title="Workspace updates"><span><Icon name="activity" size={17}/></span><i/></button>
    {updatesOpen&&<div className="updates-popover"><div className="updates-head"><b>Workspace status</b><span>Live</span></div>
     <div className="update-row"><span className="update-check">✓</span><div><b>Admin session active</b><small>Authorised workspace access</small></div></div>
     <div className="update-row"><span className="update-check">✓</span><div><b>Course catalogue loaded</b><small>{exams.length} examination courses available</small></div></div>
@@ -141,10 +161,10 @@ export default function AdminHome() {
       <main className="page-content">
         {error&&<div className="notice-error" role="alert">{error}</div>}
         {section==="overview"&&<><div className="page-heading"><div><p className="eyebrow">ADMIN WORKSPACE</p><h1>Good to see you.</h1><p className="muted">Here’s what’s happening across UP Teacher Master today.</p></div><span className="date-chip">● Live workspace</span></div>
-          <div className="stat-grid"><article className="stat-card"><span className="stat-icon indigo">♙</span><small>Total student profiles</small><strong>{stats.students}</strong><span className="stat-foot">Registered accounts</span></article><article className="stat-card"><span className="stat-icon blue">▤</span><small>Question bank</small><strong>{stats.questions}</strong><span className="stat-foot">Questions in database</span></article><article className="stat-card"><span className="stat-icon green">▣</span><small>Study materials</small><strong>{stats.materials}</strong><span className="stat-foot">Learning resources</span></article><article className="stat-card"><span className="stat-icon amber">◇</span><small>Examinations</small><strong>{stats.exams}</strong><span className="stat-foot">Configured courses</span></article></div>
-          <div className="overview-grid"><section className="panel-card"><div className="panel-heading"><div><h2>Quick actions</h2><p>Jump straight into your daily work.</p></div></div><div className="quick-grid"><button onClick={()=>go("questions")}><span>＋</span><b>Upload questions</b><small>Excel, CSV or Word</small></button><button onClick={()=>go("mocks")}><span>◷</span><b>Create mock test</b><small>Full or subject-wise</small></button><button onClick={()=>go("content")}><span>▣</span><b>Manage content</b><small>Study material & syllabus</small></button><button onClick={()=>go("announcements")}><span>◉</span><b>Send announcement</b><small>Reach your students</small></button></div></section>
+          <div className="stat-grid"><article className="stat-card"><span className="stat-icon indigo"><Icon name="activity" size={18}/></span><small>Total student profiles</small><strong>{stats.students}</strong><span className="stat-foot">Registered accounts</span></article><article className="stat-card"><span className="stat-icon blue"><Icon name="file" size={18}/></span><small>Question bank</small><strong>{stats.questions}</strong><span className="stat-foot">Questions in database</span></article><article className="stat-card"><span className="stat-icon green"><Icon name="book" size={18}/></span><small>Study materials</small><strong>{stats.materials}</strong><span className="stat-foot">Learning resources</span></article><article className="stat-card"><span className="stat-icon amber"><Icon name="shield" size={18}/></span><small>Examinations</small><strong>{stats.exams}</strong><span className="stat-foot">Configured courses</span></article></div>
+          <div className="overview-grid"><section className="panel-card"><div className="panel-heading"><div><h2>Quick actions</h2><p>Jump straight into your daily work.</p></div></div><div className="quick-grid"><button onClick={()=>go("questions")}><span><Icon name="plus" size={18}/></span><b>Upload questions</b><small>Excel, CSV or Word</small></button><button onClick={()=>go("mocks")}><span><Icon name="clock" size={18}/></span><b>Create mock test</b><small>Full or subject-wise</small></button><button onClick={()=>go("content")}><span><Icon name="book" size={18}/></span><b>Manage content</b><small>Study material & syllabus</small></button><button onClick={()=>go("announcements")}><span><Icon name="bell" size={18}/></span><b>Send announcement</b><small>Reach your students</small></button></div></section>
           <section className="panel-card"><div className="panel-heading"><div><h2>Exam courses</h2><p>Configured examinations in the system.</p></div></div><div className="exam-list">{exams.map((exam,index)=><div className="exam-row" key={exam.id}><span className="exam-number">{String(index+1).padStart(2,"0")}</span><div><b>{exam.name_en}</b><small>{exam.name_hi}</small></div><span className="exam-code">{exam.code}</span></div>)}{!exams.length&&<p className="muted">No examinations configured yet.</p>}</div></section></div>
-          <section className="panel-card module-overview"><div className="panel-heading"><div><h2>Management modules</h2><p>All administration tools, organised in one place.</p></div></div><div className="module-grid">{NAV.filter(x=>x.id!=="overview").map(item=><button key={item.id} onClick={()=>go(item.id)}><span className="module-icon">{item.icon}</span><b>{item.label}</b><small>{item.hint}</small><span className="module-arrow">→</span></button>)}</div></section>
+          <section className="panel-card module-overview"><div className="panel-heading"><div><h2>Management modules</h2><p>All administration tools, organised in one place.</p></div></div><div className="module-grid">{NAV.filter(x=>x.id!=="overview").map(item=><button key={item.id} onClick={()=>go(item.id)}><span className="module-icon"><Icon name={item.icon} size={19}/></span><b>{item.label}</b><small>{item.hint}</small><span className="module-arrow">→</span></button>)}</div></section>
         </>}
         {section!=="overview"&&<div className="page-heading"><div><p className="eyebrow">MANAGEMENT MODULE</p><h1>{activeNav.label}</h1><p className="muted">{activeNav.hint}</p></div><button className="btn-secondary" onClick={()=>go("overview")}>← Dashboard</button></div>}
         {section==="questions"&&<><div className="module-intro"><b>Question workflow</b><span>Choose exam → choose subject → import → preview → approve → publish.</span></div><QuestionBulkImportCenter exams={exams} onImported={async()=>{setQuestionBankVersion(v=>v+1);}} /><QuestionQualityCenter key={questionBankVersion} /></>}
