@@ -378,7 +378,7 @@ jobs:
              try{if(await db.rpc('has_premium_access')!=true){if(!mounted)return;await Navigator.push(context,MaterialPageRoute(builder:(_)=>PremiumMembershipScreen(language:widget.language)));return;}}
              catch(_){msg(t('Membership verification failed.','सदस्यता सत्यापन विफल।'));return;}
           }
-          """
+          """.rstrip()
           if premium_gate in s:
               s = s.replace(premium_gate, "", 1)
           elif "PremiumMembershipScreen" in s:
