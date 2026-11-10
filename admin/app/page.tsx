@@ -30,6 +30,7 @@ export default function AdminHome() {
   const [exams, setExams] = useState<Exam[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [questionBankVersion, setQuestionBankVersion] = useState(0);
 
   async function refresh() {
     setChecking(true);
@@ -160,12 +161,17 @@ export default function AdminHome() {
       {exams.map(exam=><p key={exam.id}><b>{exam.name_en}</b> · {exam.name_hi} <small>({exam.code})</small></p>)}
       {!exams.length && <p className="muted">No active exams found. Run the Phase 1 database migration.</p>}
     </section>
-    <MockTestBuilder exams={exams} />
-    <QuestionQualityCenter />
-    <QuestionBulkImportCenter exams={exams} onImported={async()=>{}} />
+    <nav aria-label="Admin quick actions" className="card" style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:20}}>
+      <a href="#question-upload" style={{border:"1px solid #cbd5e1",borderRadius:10,padding:"10px 14px",fontWeight:600}}>1. Upload Questions (Excel / Word)</a>
+      <a href="#mock-tests" style={{border:"1px solid #cbd5e1",borderRadius:10,padding:"10px 14px",fontWeight:600}}>2. Create / Update Mock Tests</a>
+      <a href="#content-management" style={{border:"1px solid #cbd5e1",borderRadius:10,padding:"10px 14px",fontWeight:600}}>3. Manage Course Content</a>
+    </nav>
+    <div id="question-upload"><QuestionBulkImportCenter exams={exams} onImported={async()=>{setQuestionBankVersion(version=>version+1);}} /></div>
+    <div id="mock-tests"><MockTestBuilder exams={exams} /></div>
     <MembershipManager />
+    <div id="content-management"><ContentStudio /></div>
+    <div id="quality-control"><QuestionQualityCenter key={questionBankVersion} /></div>
     <AnnouncementManager exams={exams} />
     <DoubtReviewCenter />
-    <ContentStudio />
   </main>;
 }
