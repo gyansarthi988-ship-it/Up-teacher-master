@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "exam_code": "SUPER_TET_2026",
+  "exam_name_en": "Assistant Teacher Recruitment Examination (commonly called Super TET)",
+  "exam_name_hi": "सहायक अध्यापक भर्ती परीक्षा (सामान्यतः Super TET)",
+  "source": {
+    "authority": "UPESSC",
+    "official_page": "https://upessc.up.gov.in/Home/Syllabus_all",
+    "official_pdf": "https://www.upessc.up.gov.in/syllabus/3c14a64c-793d-4b65-9d67-5cc75d255c84.pdf",
+    "verified_date": "2026-11-10"
+  },
+  "pattern": {
+    "questions": 120,
+    "marks": 360,
+    "duration_minutes": 120,
+    "correct_marks": 3,
+    "wrong_marks": -1,
+    "language": "Hindi and English",
+    "answer_mode": "OMR"
+  },
+  "syllabus_status": "official_document_identified_full_topic_transcription_pending",
+  "sections": [],
+  "admin_note": "This is the Assistant Teacher Recruitment Examination, not UPTET Paper I or Paper II. The section-wise topic/weightage breakdown must be transcribed directly from the official UPESSC PDF before importing or publishing. Do not reuse the UPTET syllabus here."
+}
