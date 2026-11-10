@@ -3,7 +3,7 @@ name: Build UP Teacher Master Release APK and AAB
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, free-only-student-tests-admin]
     paths:
       - '.github/workflows/android-release.yml'
       - 'UP_Teacher_Master_Launch_Files.zip'
@@ -60,6 +60,8 @@ jobs:
           mkdir -p supabase/migrations
           cp release-patches/supabase/migrations/0020_username_registration.sql supabase/migrations/0020_username_registration.sql
           cp release-patches/supabase/migrations/0021_spaced_revision_rpc_repair.sql supabase/migrations/0021_spaced_revision_rpc_repair.sql
+          cp release-patches/supabase/migrations/0022_shared_question_exam_mapping.sql supabase/migrations/0022_shared_question_exam_mapping.sql
+          cp release-patches/supabase/migrations/0023_free_content_access.sql supabase/migrations/0023_free_content_access.sql
           cp release-patches/mobile/lib/screens/profile_screen.dart "$mobile_dir/lib/screens/profile_screen.dart"
           cp release-patches/mobile/lib/screens/syllabus_tracker_screen.dart "$mobile_dir/lib/screens/syllabus_tracker_screen.dart"
           cp release-patches/mobile/lib/screens/premium_membership_screen.dart "$mobile_dir/lib/screens/premium_membership_screen.dart"
@@ -135,6 +137,263 @@ jobs:
           gradle.write_text(g)
           print("Applied verified AI Mentor, Mock Test and Android NDK fixes.")
           PY
+
+      - name: Simplify student course and test-series flow
+        shell: bash
+        run: |
+          python3 - "${{ steps.locate_mobile.outputs.mobile_dir }}" <<'PYFLOW'
+          from pathlib import Path
+          import sys
+          root = Path(sys.argv[1]) / "lib/screens"
+
+          # The student catalogue must never call a membership RPC or block a test.
+          p = root / "mock_test_catalog_screen.dart"
+          s = p.read_text()
+          s = s.replace("import 'premium_membership_screen.dart';\n", "")
+          s = s.replace("  bool _premiumAccess = false;\n", "")
+          s = s.replace("  void initState() { super.initState(); _future = _load(); _loadEntitlement(); }\n  Future<void> _loadEntitlement() async { try { final value = await Supabase.instance.client.rpc('has_premium_access'); if (mounted) setState(() => _premiumAccess = value == true); } catch (_) {} }\n", "  void initState() { super.initState(); _future = _load(); }\n")
+          s = s.replace(",is_premium,question_selection", ",question_selection")
+          s = s.replace("t('मॉक टेस्ट चुनें', 'Choose Mock Test')", "t('टेस्ट सीरीज़ चुनें', 'Choose Test Series')")
+          s = s.replace("            final premium = item['is_premium'] == true;\n", "")
+          s = s.replace("              Row(children: [Expanded(child: Text(title.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17))), if (premium) const Chip(label: Text('PREMIUM'))]),", "              Text(title.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),")
+          old = "                onPressed: premium && !_premiumAccess ? () { Navigator.of(context).push(MaterialPageRoute(builder: (_) => PremiumMembershipScreen(language: hi ? 'hi' : 'en'))); } : () {"
+          if old not in s and "has_premium_access" in s:
+              raise SystemExit("Premium gate pattern changed; refusing partial catalogue patch")
+          s = s.replace(old, "                onPressed: () {")
+          s = s.replace("          Text(widget.examName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),\n            Text(t('पब्लिश किए गए exam-pattern आधारित टेस्ट','Published exam-pattern based tests')),", "          Text(widget.examName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),\n            const SizedBox(height: 4),\n            Text(t('अपनी टेस्ट सीरीज़ चुनें और तुरंत अभ्यास शुरू करें। सभी टेस्ट मुफ्त हैं।','Select a test series and start practising. Every available test is free.')),")
+          p.write_text(s)
+
+          # Pass language into the selected course and expose test series before topic practice.
+          p = root / "home_screen.dart"
+          s = p.read_text()
+          s = s.replace("import 'premium_membership_screen.dart';\n", "")
+          s = s.replace("        ListTile(leading: const Icon(Icons.workspace_premium), title: Text(isHindi ? 'प्रीमियम सदस्यता' : 'Premium Membership'), onTap: () { Navigator.of(context).pop(); Navigator.of(context).push(MaterialPageRoute(builder: (_) => PremiumMembershipScreen(language: isHindi ? 'hi' : 'en'))); }),\n", "")
+          s = s.replace(".select('id,name_en').eq('code', e.$1)", ".select('id,name_en,name_hi').eq('code', e.$1)")
+          s = s.replace("                    examName: exam['name_en'] as String,\n", "                    examName: (isHindi ? exam['name_hi'] : exam['name_en'] ?? exam['name_hi']) as String? ?? e.$2,\n                    language: isHindi ? 'hi' : 'en',\n")
+          s = s.replace("isHindi ? 'अपनी परीक्षा चुनें' : 'Choose Your Examination'", "isHindi ? 'अपना कोर्स / परीक्षा चुनें' : 'Choose Your Course / Examination'")
+          p.write_text(s)
+
+          p = root / "exam_content_screen.dart"
+          s = p.read_text()
+          s = s.replace("  final String examName;\n  const ExamContentScreen({super.key, required this.examId, required this.examName});", "  final String examName;\n  final String language;\n  const ExamContentScreen({super.key, required this.examId, required this.examName, this.language = 'en'});")
+          s = s.replace("class _ExamContentScreenState extends State<ExamContentScreen> {\n", "class _ExamContentScreenState extends State<ExamContentScreen> {\n  bool get hi => widget.language == 'hi';\n  String t(String hindi, String english) => hi ? hindi : english;\n")
+          s = s.replace("Text('Examination syllabus',", "Text(t('परीक्षा का सिलेबस', 'Examination syllabus'),")
+          s = s.replace("title: const Text('Full-Length Mock Tests', style: TextStyle(fontWeight: FontWeight.bold)),\n                subtitle: const Text('Exam pattern • Subject-wise distribution • Timed test'),", "title: Text(t('टेस्ट सीरीज़ और मॉक टेस्ट', 'Test Series & Mock Tests'), style: const TextStyle(fontWeight: FontWeight.bold)),\n                subtitle: Text(t('टेस्ट चुनें और अपनी तैयारी शुरू करें','Choose a test and start your preparation')),")
+          s = s.replace("examId: widget.examId, examName: widget.examName,\n", "examId: widget.examId, examName: widget.examName, language: widget.language,\n")
+          s = s.replace("const Text('Subjects and topics published by the UP Teacher Master content team.',", "Text(t('विषय और टॉपिक के अनुसार प्रैक्टिस टेस्ट भी उपलब्ध हैं।','Topic-wise practice tests are also available below.'),")
+          s = s.replace("topicName: (topic['name_hi'] ?? topic['name_en']).toString(),", "topicName: (hi ? topic['name_hi'] : topic['name_en'] ?? topic['name_hi']).toString(),")
+          p.write_text(s)
+          print("Applied free test access and course → test-series → topic-practice navigation.")
+          PYFLOW
+
+      - name: Enable subject practice and shared-course questions
+        shell: bash
+        run: |
+          python3 - "${{ steps.locate_mobile.outputs.mobile_dir }}" <<'PYSHARED'
+          from pathlib import Path
+          import sys
+          root = Path(sys.argv[1]) / "lib/screens"
+
+          # Both full mocks and practice use a student-safe RPC that returns options, never answer keys.
+          mock = root / "mock_test_screen.dart"
+          s = mock.read_text()
+          old = """      final rows = await _db.from('questions').select('id,subject_id,topic_id,difficulty,question_hi,question_en,marks,negative_marks,question_options(id,option_key,text_hi,text_en,display_order)')
+        .eq('exam_id', widget.examId).eq('status', 'published').limit(2000);"""
+          new = """      final rows = await _db.rpc('get_published_exam_questions', params: {'p_exam_id': widget.examId});
+                final pool = (rows as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();"""
+          if old not in s:
+              old = """      final rows = await _db.from('questions').select('id,subject_id,topic_id,difficulty,question_hi,question_en,marks,negative_marks,question_options(id,option_key,text_hi,text_en,display_order)')
+                .eq('exam_id', widget.examId).eq('status', 'published').limit(2000);"""
+              if old not in s:
+                  raise SystemExit("Mock question query pattern not found; refusing unsafe patch")
+              s = s.replace(old, """      final rows = await _db.rpc('get_published_exam_questions', params: {'p_exam_id': widget.examId});""", 1)
+              # Keep the existing pool conversion immediately after the query.
+          else:
+              s = s.replace(old, new, 1)
+          s = s.replace("if (items.length < widget.questionCount && widget.templateId != null) {", "if (items.length < widget.questionCount) {")
+          mock.write_text(s)
+
+          practice = root / "practice_screen.dart"
+          s = practice.read_text()
+          s = s.replace("  final String topicId;\n", "  final String? topicId;\n  final String? subjectId;\n", 1)
+          s = s.replace("required this.examId, required this.topicId, required this.topicName, this.questionIds, this.onSubmitted",
+                        "required this.examId, this.topicId, required this.topicName, this.subjectId, this.questionIds, this.onSubmitted")
+          start = s.index("  Future<void> _load() async {")
+          end = s.index("\n  void _startMockTimer()", start)
+          load = """  Future<void> _load() async {
+            try {
+              final rows = await Supabase.instance.client.rpc('get_published_exam_questions', params: {'p_exam_id': widget.examId});
+              var list = (rows as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+              if (widget.questionIds != null) {
+                if (widget.questionIds!.isEmpty) list = [];
+                else list = list.where((q) => widget.questionIds!.contains(q['id'].toString())).toList();
+              } else if (widget.subjectId != null) {
+                list = list.where((q) => q['subject_id'].toString() == widget.subjectId).toList();
+              } else if (widget.topicId != null) {
+                list = list.where((q) => q['topic_id'].toString() == widget.topicId).toList();
+              }
+              list.shuffle();
+              if (list.length > 50) list = list.take(50).toList();
+              for (final q in list) {
+                final opts = (q['question_options'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+                opts.sort((a,b) => (a['display_order'] as int? ?? 0).compareTo(b['display_order'] as int? ?? 0));
+                q['question_options'] = opts;
+              }
+              if (!mounted) return;
+              setState(() { _questions = list; _loading = false; });
+            } catch (e) { if (mounted) setState(() { _error = e.toString(); _loading = false; }); }
+          }
+"""
+          s = s[:start] + load + s[end:]
+          s = s.replace("widget.topicId);", "widget.topicId ?? '');")
+          practice.write_text(s)
+
+          # Add subject-level practice and a timed subject mock to every course subject card.
+          content = root / "exam_content_screen.dart"
+          s = content.read_text()
+          if "import 'mock_test_screen.dart';" not in s:
+              s = s.replace("import 'mock_test_catalog_screen.dart';", "import 'mock_test_catalog_screen.dart';\nimport 'mock_test_screen.dart';")
+          needle = """                    children: subjectChapters.map((chapter) {"""
+          replacement = """                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.play_circle_outline),
+                        title: Text(t('इस विषय की प्रैक्टिस करें', 'Practice this subject')),
+                        subtitle: Text(t('इस कोर्स के सभी प्रकाशित प्रश्न', 'All published questions for this course and subject')),
+                        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PracticeScreen(
+                          examId: widget.examId, topicId: null,
+                          subjectId: subject['id'] as String,
+                          topicName: (hi ? subject['name_hi'] : subject['name_en'] ?? subject['name_hi']).toString(),
+                        ))),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.timer_outlined),
+                        title: Text(t('विषयवार मॉक पेपर', 'Subject-wise Mock Paper')),
+                        subtitle: Text(t('30 प्रश्न · 30 मिनट', '30 questions · 30 minutes')),
+                        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => MockTestScreen(
+                          examId: widget.examId, durationMinutes: 30, questionCount: 30,
+                          language: widget.language,
+                          questionSelection: {'strategy':'random','published_only':true,'subject_distribution':{subject['id'].toString():30}},
+                        ))),
+                      ),
+                      ...subjectChapters.map((chapter) {"""
+          if needle not in s:
+              raise SystemExit("Subject chapter expansion insertion point not found")
+          s = s.replace(needle, replacement, 1)
+          s = s.replace("                    }).toList(),\n                  ),", "                    }).toList(),\n                    ],\n                  ),", 1)
+          content.write_text(s)
+          print("Enabled shared-course question feed, subject practice and subject-wise mock launch.")
+          PYSHARED
+
+      - name: Refresh published cloud content when students return to the app
+        shell: bash
+        run: |
+          python3 - "${{ steps.locate_mobile.outputs.mobile_dir }}" <<'PYSYNC'
+          from pathlib import Path
+          import sys
+
+          root = Path(sys.argv[1]) / "lib/screens"
+
+          def replace_once(path, old, new, label):
+              source = path.read_text()
+              if old not in source:
+                  if new in source:
+                      return
+                  raise SystemExit(f"{label}: expected source pattern not found; refusing unsafe patch")
+              path.write_text(source.replace(old, new, 1))
+
+          exam = root / "exam_content_screen.dart"
+          replace_once(exam,
+              "class _ExamContentScreenState extends State<ExamContentScreen> {",
+              "class _ExamContentScreenState extends State<ExamContentScreen> with WidgetsBindingObserver {",
+              "Exam content lifecycle observer")
+          replace_once(exam,
+              "    _future = _load();\n  }",
+              "    _future = _load();\n    WidgetsBinding.instance.addObserver(this);\n  }",
+              "Exam content initial sync")
+          replace_once(exam,
+              "  Future<_SyllabusData> _load() async {",
+              """  @override
+            void didChangeAppLifecycleState(AppLifecycleState state) {
+              if (state == AppLifecycleState.resumed && mounted) {
+                setState(() => _future = _load());
+              }
+            }
+
+            @override
+            void dispose() {
+              WidgetsBinding.instance.removeObserver(this);
+              super.dispose();
+            }
+
+            Future<_SyllabusData> _load() async {""",
+              "Exam content resume refresh")
+
+          catalog = root / "mock_test_catalog_screen.dart"
+          replace_once(catalog,
+              "class _MockTestCatalogScreenState extends State<MockTestCatalogScreen> {",
+              "class _MockTestCatalogScreenState extends State<MockTestCatalogScreen> with WidgetsBindingObserver {",
+              "Mock catalogue lifecycle observer")
+          replace_once(catalog,
+              "  void initState() { super.initState(); _future = _load(); }",
+              "  void initState() { super.initState(); _future = _load(); WidgetsBinding.instance.addObserver(this); }",
+              "Mock catalogue initial sync")
+          replace_once(catalog,
+              "  Future<List<Map<String, dynamic>>> _load() async {",
+              """  @override
+            void didChangeAppLifecycleState(AppLifecycleState state) {
+              if (state == AppLifecycleState.resumed && mounted) {
+                setState(() => _future = _load());
+              }
+            }
+
+            @override
+            void dispose() {
+              WidgetsBinding.instance.removeObserver(this);
+              super.dispose();
+            }
+
+            Future<List<Map<String, dynamic>>> _load() async {""",
+              "Mock catalogue resume refresh")
+
+          library = root / "study_material_library_screen.dart"
+          replace_once(library,
+              "class _StudyMaterialLibraryScreenState extends State<StudyMaterialLibraryScreen>{",
+              "class _StudyMaterialLibraryScreenState extends State<StudyMaterialLibraryScreen> with WidgetsBindingObserver{",
+              "Study library lifecycle observer")
+          replace_once(library,
+              "@override void initState(){super.initState();load();}",
+              "@override void initState(){super.initState();WidgetsBinding.instance.addObserver(this);load();}",
+              "Study library initial sync")
+          replace_once(library,
+              " Future<void> load() async {",
+              """ @override void didChangeAppLifecycleState(AppLifecycleState state){if(state==AppLifecycleState.resumed&&mounted)load();}
+ @override void dispose(){WidgetsBinding.instance.removeObserver(this);super.dispose();}
+ Future<void> load() async {""",
+              "Study library resume refresh")
+
+          # This release is free-only: premium-tagged published materials are also accessible.
+          library = root / "study_material_library_screen.dart"
+          s = library.read_text()
+          s = s.replace("import 'premium_membership_screen.dart';\n", "")
+          premium_gate = """  if(x['access_tier']=='premium'){
+           try{if(await db.rpc('has_premium_access')!=true){if(!mounted)return;await Navigator.push(context,MaterialPageRoute(builder:(_)=>PremiumMembershipScreen(language:widget.language)));return;}}
+           catch(_){msg(t('Membership verification failed.','सदस्यता सत्यापन विफल।'));return;}
+  }
+"""
+          if premium_gate in s:
+              s = s.replace(premium_gate, "", 1)
+          elif "PremiumMembershipScreen" in s:
+              raise SystemExit("Study material premium gate changed; refusing partial free-only patch")
+          s = s.replace("for(final f in ['all','pending','completed','free','premium'])", "for(final f in ['all','pending','completed','free'])")
+          s = s.replace("return matches&&(filter=='all'||(filter=='completed'?(progress[x['id']]=='completed'):filter=='pending'?(progress[x['id']]!='completed'):x['access_tier']==filter));",
+                        "return matches&&(filter=='all'||(filter=='completed'?(progress[x['id']]=='completed'):filter=='pending'?(progress[x['id']]!='completed'):filter=='free'));")
+          s = s.replace("${x['access_tier']=='premium'?'PREMIUM':'FREE'}", "FREE")
+          s = s.replace("'free':'FREE','premium':'PREMIUM'", "'free':'FREE'")
+          s = s.replace("Icon(x['access_tier']=='premium'?Icons.workspace_premium:Icons.menu_book)", "Icon(Icons.menu_book)")
+          library.write_text(s)
+
+          print("Enabled cloud content refresh on app resume and removed all study-material paywalls for the free-only launch.")
+          PYSYNC
 
       - uses: actions/setup-java@v4
         with:
@@ -267,6 +526,19 @@ jobs:
           storeFile=upload-keystore.jks
           EOF
 
+      - name: Remove unused payment SDK from free-only build
+        working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("pubspec.yaml")
+          lines = p.read_text().splitlines()
+          kept = [line for line in lines if not re.match(r"^\s*razorpay_flutter\s*:", line)]
+          p.write_text("\n".join(kept) + "\n")
+          print("Removed unused Razorpay dependency from the free-only build.")
+          PY
+
       - name: Install Flutter dependencies
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
         run: flutter pub get
@@ -277,7 +549,7 @@ jobs:
 
       - name: Build signed APK
         working-directory: ${{ steps.locate_mobile.outputs.mobile_dir }}
-        run: flutter build apk --release --dart-define=PLAY_STORE_BUILD=false --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+        run: flutter build apk --release --target-platform android-arm64 --dart-define=PLAY_STORE_BUILD=false --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Upload APK and AAB
         uses: actions/upload-artifact@v4
