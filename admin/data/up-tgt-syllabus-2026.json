@@ -10,27 +10,7 @@
     "official_syllabus_index": "https://upessc.up.gov.in/Home/Syllabus_all",
     "verified_date": "2026-11-10"
   },
-  "pattern": {
-    "questions": 120,
-    "marks": 360,
-    "duration_minutes": 120,
-    "correct_marks": 3,
-    "wrong_marks": -1,
-    "sections": [
-      {
-        "name_en": "General Knowledge",
-        "name_hi": "सामान्य ज्ञान",
-        "questions": 30,
-        "marks": 90
-      },
-      {
-        "name_en": "Concerned Subject",
-        "name_hi": "संबंधित विषय",
-        "questions": 90,
-        "marks": 270
-      }
-    ]
-  },
+  "pattern": null,
   "subjects": [
     {
       "code": "TGT-01",
@@ -150,5 +130,6 @@
     }
   ],
   "subject_syllabus_status": "official_subject_pdfs_exist_but_full_topic_transcription_not_yet_completed",
-  "admin_note": "Common GK outline is a preliminary working outline only. Each selected TGT subject requires its own UPESSC subject PDF transcription and review. Do not treat the common GK outline as an exhaustive official topic list."
+  "admin_note": "The common GK outline and subject list are preliminary review aids. Do not publish question count, marks, duration, negative marking or claim an exhaustive syllabus until each field and each selected subject is transcribed from its official UPESSC 2026 PDF.",
+  "exam_pattern_status": "official_notification_pattern_not_yet_independently_transcribed"
 }
