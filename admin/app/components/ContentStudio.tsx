@@ -263,8 +263,8 @@ export default function ContentStudio() {
           <p className="text-xs font-bold uppercase tracking-wide text-amber-800">Super TET · Assistant Teacher Recruitment</p>
           <h2 className="mt-1 text-lg font-bold text-slate-900">{superTet2026.exam_name_en}</h2>
           <p className="text-sm text-slate-700">{superTet2026.exam_name_hi}</p>
-          <p className="mt-2 text-sm text-slate-700">120 MCQs · 360 marks · 120 minutes · +3 / −1</p>
-          <p className="mt-3 text-xs text-amber-900">Official PDF identified. Section-wise topics and weightage are not yet transcribed; no guessed syllabus will be imported.</p>
+          <p className="mt-2 text-sm text-slate-700">Official syllabus PDF identified · exam pattern verification pending</p>
+          <p className="mt-3 text-xs text-amber-900">Question count, marks, duration, marking scheme and section-wise topics are awaiting direct transcription from the official PDF. No unverified pattern will be shown or imported.</p>
           <a className="mt-2 inline-block text-xs font-semibold text-amber-900 underline" href={superTet2026.source.official_pdf} target="_blank" rel="noreferrer">Open official Super TET PDF</a>
         </article>
       </div>
