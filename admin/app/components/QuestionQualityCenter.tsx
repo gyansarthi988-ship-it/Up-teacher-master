@@ -5,11 +5,12 @@ import { supabase } from "../../lib/supabase";
 
 type Question = { id:string; exam_id:string; subject_id:string; topic_id:string|null; question_hi:string|null; question_en:string|null; difficulty:string; status:string; created_at:string };
 type Finding = { code:string; label:string; severity:"error"|"warning" };
-type AuditRow = { question:Question; findings:Finding[]; options:number; hasAnswer:boolean; hasExplanation:boolean; duplicateIds:string[] };
+type OptionRow = { id:string; question_id:string; option_key:string; text_hi:string|null; text_en:string|null };
+type AuditRow = { question:Question; findings:Finding[]; options:number; optionRows:OptionRow[]; correctOptionId:string|null; hasAnswer:boolean; hasExplanation:boolean; duplicateIds:string[] };
 const field = "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm";
 
 export default function QuestionQualityCenter(){
-  const [rows,setRows]=useState<AuditRow[]>([]); const [loading,setLoading]=useState(true); const [busy,setBusy]=useState<string|null>(null);
+  const [rows,setRows]=useState<AuditRow[]>([]); const [loading,setLoading]=useState(true); const [busy,setBusy]=useState<string|null>(null); const [selected,setSelected]=useState<string[]>([]); const [bulkBusy,setBulkBusy]=useState(false);
   const [filter,setFilter]=useState("all"); const [search,setSearch]=useState(""); const [error,setError]=useState(""); const [notice,setNotice]=useState("");
   const load=useCallback(async()=>{setLoading(true);setError("");
     const [q,o,a,x]=await Promise.all([
@@ -34,12 +35,32 @@ export default function QuestionQualityCenter(){
       const key=(question.question_en||question.question_hi||"").toLowerCase().normalize("NFKC").replace(/[^\p{L}\p{N}]+/gu," ").trim();
       const duplicateIds=key.length>=18?(normalized.get(key)??[]).filter(id=>id!==question.id):[];
       if(duplicateIds.length)findings.push({code:"duplicate",label:`Possible duplicate (${duplicateIds.length} match${duplicateIds.length===1?"":"es"})`,severity:"warning"});
-      return {question,findings,options:ownOptions.length,hasAnswer:!!answer,hasExplanation:!!explanation,duplicateIds};
-    });setRows(next);setLoading(false);
+      return {question,findings,options:ownOptions.length,optionRows:ownOptions as OptionRow[],correctOptionId:answer?.correct_option_id??null,hasAnswer:!!answer,hasExplanation:!!explanation,duplicateIds};
+    });setRows(next);setSelected([]);setLoading(false);
   },[]);
   useEffect(()=>{void load();},[load]);
   const counts=useMemo(()=>({total:rows.length,errors:rows.filter(r=>r.findings.some(f=>f.severity==="error")).length,warnings:rows.filter(r=>r.findings.some(f=>f.severity==="warning")).length,clean:rows.filter(r=>!r.findings.length).length}),[rows]);
   const visible=useMemo(()=>rows.filter(r=>{const matches=filter==="all"||(filter==="issues"&&r.findings.length>0)||(filter==="errors"&&r.findings.some(f=>f.severity==="error"))||(filter==="clean"&&!r.findings.length)||(filter===r.question.status);const hay=`${r.question.question_en??""} ${r.question.question_hi??""} ${r.question.id}`.toLowerCase();return matches&&hay.includes(search.toLowerCase());}),[rows,filter,search]);
+  const publishable = visible.filter(row=>row.question.status!=="published"&&!row.findings.some(f=>f.severity==="error"));
+  const allVisibleSelected = publishable.length>0 && publishable.every(row=>selected.includes(row.question.id));
+  function toggleSelected(id:string,checked:boolean){setSelected(current=>checked?[...new Set([...current,id])]:current.filter(x=>x!==id));}
+  async function approveSelected(){
+    const chosen=rows.filter(row=>selected.includes(row.question.id));
+    if(!chosen.length)return;
+    const blocked=chosen.filter(row=>row.findings.some(f=>f.severity==="error"));
+    if(blocked.length){setError("Selected questions contain critical errors. Remove them from selection or fix the errors first.");return;}
+    setBulkBusy(true);setError("");setNotice("");
+    try{
+      const uid=(await supabase.auth.getUser()).data.user?.id;
+      const ids=chosen.map(row=>row.question.id);
+      const {error}=await supabase.from("questions").update({status:"published",reviewed_by:uid,published_at:new Date().toISOString()}).in("id",ids);
+      if(error)throw error;
+      setNotice(`${ids.length} selected questions approved and published. They are now available to students.`);
+      setSelected([]);
+      await load();
+    }catch(e){setError(e instanceof Error?e.message:"Bulk approval failed.");}
+    finally{setBulkBusy(false);}
+  }
   async function setStatus(row:AuditRow,status:"under_review"|"approved"|"published"|"draft"){setBusy(row.question.id);setError("");setNotice("");
     if(status==="published"&&row.findings.some(f=>f.severity==="error")){setError("Resolve all critical errors before publishing this question.");setBusy(null);return;}
     const uid=(await supabase.auth.getUser()).data.user?.id;
@@ -53,11 +74,15 @@ export default function QuestionQualityCenter(){
       {[ ["Questions scanned",counts.total], ["Critical issue questions",counts.errors], ["Warnings",counts.warnings], ["No detected issues",counts.clean] ].map(([label,value])=><div key={String(label)} style={{border:"1px solid #e2e8f0",borderRadius:10,padding:12}}><small className="muted">{label}</small><h2 style={{margin:"4px 0"}}>{value}</h2></div>)}
     </div>
     <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}><input className={field} placeholder="Search question text / ID" value={search} onChange={e=>setSearch(e.target.value)} /><select className={field} value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All questions</option><option value="issues">All issues</option><option value="errors">Critical errors</option><option value="clean">No detected issues</option><option value="draft">Draft</option><option value="under_review">Under review</option><option value="approved">Approved</option><option value="published">Published</option></select></div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap",border:"1px solid #cbd5e1",borderRadius:10,padding:12,marginBottom:12}}>
+      <label style={{display:"flex",gap:8,alignItems:"center",fontWeight:600}}><input type="checkbox" checked={allVisibleSelected} onChange={e=>{const ids=publishable.map(r=>r.question.id);setSelected(current=>e.target.checked?[...new Set([...current,...ids])]:current.filter(id=>!ids.includes(id)));}} /> Select all publishable questions in this view</label>
+      <button className={field} disabled={bulkBusy||!selected.length} onClick={()=>void approveSelected()}>{bulkBusy?"Publishing…":`Approve Selected (${selected.length})`}</button>
+    </div>
     {loading?<p className="muted">Scanning question bank…</p>:visible.map(row=><article key={row.question.id} style={{borderTop:"1px solid #e2e8f0",padding:"14px 0"}}>
-      <div style={{display:"flex",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}><div style={{minWidth:240,flex:1}}><b>{row.question.question_en||row.question.question_hi||"Untitled question"}</b><p className="muted" style={{fontSize:12,margin:"4px 0"}}>{row.question.question_hi||"Hindi version missing"}</p><small className="muted">{row.question.difficulty} · {row.question.status} · {row.options}/4 options · {row.question.id.slice(0,8)}</small>
+      <div style={{display:"flex",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}><div style={{minWidth:240,flex:1}}><label style={{display:"flex",gap:8,alignItems:"flex-start"}}><input type="checkbox" checked={selected.includes(row.question.id)} disabled={row.question.status==="published"||row.findings.some(f=>f.severity==="error")} onChange={e=>toggleSelected(row.question.id,e.target.checked)} /><span><b>{row.question.question_en||row.question.question_hi||"Untitled question"}</b><p className="muted" style={{fontSize:12,margin:"4px 0"}}>{row.question.question_hi||"Hindi version missing"}</p></span></label><small className="muted">{row.question.difficulty} · {row.question.status} · {row.options}/4 options · {row.question.id.slice(0,8)}</small><div style={{marginTop:8,display:"grid",gap:5}}>{row.optionRows.map(option=><div key={option.id} style={{fontSize:13,padding:"6px 8px",borderRadius:6,background:option.id===row.correctOptionId?"#dcfce7":"#f8fafc",border:option.id===row.correctOptionId?"1px solid #86efac":"1px solid #e2e8f0"}}><b>{option.option_key}.</b> {option.text_en||option.text_hi||"Option text missing"}{option.text_hi&&option.text_en&&<div className="muted">{option.text_hi}</div>}{option.id===row.correctOptionId&&<strong style={{color:"#166534"}}> · Correct answer</strong>}</div>)}</div>
       {row.findings.length? <ul style={{margin:"8px 0",paddingLeft:18}}>{row.findings.map((f,i)=><li key={`${f.code}-${i}`} style={{fontSize:13,color:f.severity==="error"?"#b91c1c":"#a16207"}}>{f.severity.toUpperCase()}: {f.label}</li>)}</ul>:<p style={{fontSize:13,color:"#166534"}}>No configured quality issues detected.</p>}
       {row.duplicateIds.length>0&&<small className="muted">Possible duplicate IDs: {row.duplicateIds.slice(0,3).join(", ")}</small>}</div>
-      <div style={{display:"flex",gap:6,alignItems:"flex-start",flexWrap:"wrap"}}><button className={field} disabled={busy===row.question.id} onClick={()=>void setStatus(row,"under_review")}>Review</button><button className={field} disabled={busy===row.question.id||row.findings.some(f=>f.severity==="error")} onClick={()=>void setStatus(row,"approved")}>Approve</button><button className={field} disabled={busy===row.question.id||row.findings.some(f=>f.severity==="error")} onClick={()=>void setStatus(row,"published")}>Publish</button><button className={field} disabled={busy===row.question.id} onClick={()=>void setStatus(row,"draft")}>Return to draft</button></div></div>
+      <div style={{display:"flex",gap:6,alignItems:"flex-start",flexWrap:"wrap"}}><button className={field} disabled={busy===row.question.id} onClick={()=>void setStatus(row,"under_review")}>Review</button><button className={field} disabled={busy===row.question.id} onClick={()=>void setStatus(row,"draft")}>Return to draft</button></div></div>
     </article>)}
     {!loading&&!visible.length&&<p className="muted">No questions match this filter.</p>}
     <p className="muted" style={{fontSize:12,marginTop:12}}>Audit scans the latest 1,000 questions. Duplicate detection is a text-normalisation heuristic, not an AI semantic plagiarism check. Questions with critical structural errors are blocked from publishing here.</p>
