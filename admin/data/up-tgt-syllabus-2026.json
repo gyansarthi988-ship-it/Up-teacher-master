@@ -32,20 +32,90 @@
     ]
   },
   "subjects": [
-    "Hindi",
-    "English",
-    "Sanskrit",
-    "Urdu",
-    "Mathematics",
-    "Science",
-    "Social Science",
-    "Home Science",
-    "Agriculture",
-    "Physical Education",
-    "Art",
-    "Music (Vocal)",
-    "Music (Instrumental)",
-    "Commerce"
+    {
+      "code": "TGT-01",
+      "name_en": "Hindi",
+      "name_hi": "हिन्दी",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-02",
+      "name_en": "English",
+      "name_hi": "अंग्रेज़ी",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-03",
+      "name_en": "Sanskrit",
+      "name_hi": "संस्कृत",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-04",
+      "name_en": "Urdu",
+      "name_hi": "उर्दू",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-05",
+      "name_en": "Mathematics",
+      "name_hi": "गणित",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-06",
+      "name_en": "Science",
+      "name_hi": "विज्ञान",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-07",
+      "name_en": "Social Science",
+      "name_hi": "सामाजिक विज्ञान",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-08",
+      "name_en": "Home Science",
+      "name_hi": "गृह विज्ञान",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-09",
+      "name_en": "Agriculture",
+      "name_hi": "कृषि",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-10",
+      "name_en": "Physical Education",
+      "name_hi": "शारीरिक शिक्षा",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-11",
+      "name_en": "Art",
+      "name_hi": "कला",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-12",
+      "name_en": "Music (Vocal)",
+      "name_hi": "संगीत (गायन)",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-13",
+      "name_en": "Music (Instrumental)",
+      "name_hi": "संगीत (वादन)",
+      "source_status": "official_subject_pdf_transcription_pending"
+    },
+    {
+      "code": "TGT-14",
+      "name_en": "Commerce",
+      "name_hi": "वाणिज्य",
+      "source_status": "official_subject_pdf_transcription_pending"
+    }
   ],
   "general_knowledge": [
     {
@@ -80,5 +150,5 @@
     }
   ],
   "subject_syllabus_status": "official_subject_pdfs_exist_but_full_topic_transcription_not_yet_completed",
-  "admin_note": "Select the candidate's exact TGT subject. This file contains the common GK outline only; do not present it as the complete subject-wise syllabus. Transcribe the selected subject from its 2026 UPESSC PDF before publishing."
+  "admin_note": "Common GK outline is a preliminary working outline only. Each selected TGT subject requires its own UPESSC subject PDF transcription and review. Do not treat the common GK outline as an exhaustive official topic list."
 }
