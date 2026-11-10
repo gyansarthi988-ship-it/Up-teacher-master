@@ -247,6 +247,12 @@ export default function ContentStudio() {
     {message && <p className="mb-3 rounded-lg bg-green-50 p-3 text-sm text-green-800">{message}</p>}
     {error && <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     {tab==="syllabus" && <div className="space-y-4">
+      <SyllabusDraftAudit drafts={[
+        {key:"UPTET1",label:"UPTET Paper I",data:uptetPaperI,status:"Bilingual topic outline · official line-by-line review pending"},
+        {key:"UPTET2",label:"UPTET Paper II",data:uptetPaperII,status:"Bilingual topic outline · official line-by-line review pending"},
+        {key:"UP_TGT_2026",label:"UP TGT 2026",data:upTgt2026,status:"14-subject checklist · subject PDF transcription pending"},
+        {key:"SUPER_TET_2026",label:"Super TET",data:superTet2026,status:"Official PDF identified · section and pattern transcription pending"}
+      ]}/>
       <div className="grid gap-4 xl:grid-cols-2">
         <article className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
           <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">UP TGT · 2026 revised syllabus</p>
@@ -527,4 +533,43 @@ function BulkImporter({exams,subjects,topics,onDone,setMessage,setError}:{
     {report.length>0&&<div className="card"><h3 className="font-bold">Imported successfully: {report.length}</h3><p className="text-xs text-slate-600">All items are Draft and require review.</p></div>}
     {errors.length>0&&<div className="card"><h3 className="font-bold text-red-700">Rows requiring attention: {errors.length}</h3><ul className="mt-2 list-disc pl-5 text-sm text-red-700">{errors.map((x,i)=><li key={i}>{x}</li>)}</ul></div>}
   </div>;
+}
+
+function SyllabusDraftAudit({drafts}:{drafts:{key:string;label:string;data:any;status:string}[]}) {
+  function countTopics(data:any) {
+    return (data.subjects||[]).reduce((total:number,subject:any)=>total+(subject.chapters||[]).reduce((n:number,chapter:any)=>n+(chapter.topics||[]).length,0),0);
+  }
+  function exportBundle() {
+    const bundle={exported_at:new Date().toISOString(),purpose:"Admin review only; not a live database import.",drafts:drafts.map(d=>({exam_code:d.key,label:d.label,status:d.status,data:d.data}))};
+    const blob=new Blob([JSON.stringify(bundle,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download="UP_Teacher_Master_Syllabus_Review_Drafts.json"; a.click();
+    URL.revokeObjectURL(url);
+  }
+  return <section className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div><h2 className="text-lg font-bold text-slate-900">Syllabus draft audit</h2>
+      <p className="mt-1 text-sm text-slate-600">Structural check of four course drafts. Export creates a review file only; it does not write to Supabase or publish to students.</p></div>
+      <button type="button" className={secondary} onClick={exportBundle}>Export review JSON</button>
+    </div>
+    <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {drafts.map(d=>{
+        const subjects=d.data.subjects?.length||0;
+        const chapters=(d.data.subjects||[]).reduce((n:number,s:any)=>n+(s.chapters?.length||0),0);
+        const topics=countTopics(d.data);
+        return <article key={d.key} className="rounded-lg border border-slate-200 p-3">
+          <b className="block text-sm text-slate-900">{d.label}</b>
+          <p className="mt-1 text-xs text-slate-600">{d.status}</p>
+          <div className="mt-3 grid grid-cols-3 gap-1 text-center">
+            <div className="rounded bg-slate-50 p-2"><b className="block text-base">{subjects}</b><small className="text-slate-500">Subjects</small></div>
+            <div className="rounded bg-slate-50 p-2"><b className="block text-base">{chapters}</b><small className="text-slate-500">Chapters</small></div>
+            <div className="rounded bg-slate-50 p-2"><b className="block text-base">{topics}</b><small className="text-slate-500">Topics</small></div>
+          </div>
+          <p className="mt-2 text-xs text-slate-600">{d.data.pattern?"Pattern field present":"Pattern not supplied / pending verification"}</p>
+          <p className="mt-1 text-xs font-semibold text-amber-700">{topics===0?"Content transcription required":"Draft only · verify against official PDF"}</p>
+        </article>;
+      })}
+    </div>
+    <p className="mt-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-900">Counts measure current draft structure, not official completeness. A present pattern is still a draft until verified. No syllabus import or student publishing is enabled here.</p>
+  </section>;
 }
