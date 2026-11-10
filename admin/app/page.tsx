@@ -115,7 +115,7 @@ export default function AdminHome() {
           <section className="panel-card module-overview"><div className="panel-heading"><div><h2>Management modules</h2><p>All administration tools, organised in one place.</p></div></div><div className="module-grid">{NAV.filter(x=>x.id!=="overview").map(item=><button key={item.id} onClick={()=>go(item.id)}><span className="module-icon">{item.icon}</span><b>{item.label}</b><small>{item.hint}</small><span className="module-arrow">→</span></button>)}</div></section>
         </>}
         {section!=="overview"&&<div className="page-heading"><div><p className="eyebrow">MANAGEMENT MODULE</p><h1>{activeNav.label}</h1><p className="muted">{activeNav.hint}</p></div><button className="btn-secondary" onClick={()=>go("overview")}>← Dashboard</button></div>}
-        {section==="questions"&&<><div className="module-intro"><b>Question workflow</b><span>Choose exam → choose subject → import → preview → approve → publish.</span></div><QuestionBulkImportCenter exams={exams} onImported={()=>setQuestionBankVersion(v=>v+1)} /><QuestionQualityCenter key={questionBankVersion} /></>}
+        {section==="questions"&&<><div className="module-intro"><b>Question workflow</b><span>Choose exam → choose subject → import → preview → approve → publish.</span></div><QuestionBulkImportCenter exams={exams} onImported={async()=>{setQuestionBankVersion(v=>v+1);}} /><QuestionQualityCenter key={questionBankVersion} /></>}
         {section==="mocks"&&<MockTestBuilder exams={exams} />}
         {section==="content"&&<ContentStudio />}
         {section==="announcements"&&<AnnouncementManager exams={exams} />}
